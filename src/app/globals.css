@@ -1,0 +1,260 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ */
+/*  Design tokens (established personal brand)                         */
+/* ------------------------------------------------------------------ */
+@theme {
+  /* Backgrounds & surfaces */
+  --color-base: #0d1117;
+  --color-surface: #10182a;
+  --color-surface-2: #0f1420;
+  --color-hairline: #21262d;
+
+  /* Brand */
+  --color-indigo: #818cf8;
+  --color-violet: #a78bfa;
+  --color-deep-indigo: #6366f1;
+  --color-cyan: #22d3ee;
+
+  /* Text */
+  --color-ink: #e6edf3;
+  --color-body: #c9d1d9;
+  --color-muted: #8b949e;
+  --color-faint: #6e7681;
+
+  /* Heatmap greens */
+  --color-hm-0: #161b22;
+  --color-hm-1: #0e4429;
+  --color-hm-2: #006d32;
+  --color-hm-3: #26a641;
+  --color-hm-4: #39d353;
+
+  /* Fonts (wired via next/font variables in layout.tsx) */
+  --font-sans: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", monospace;
+
+  /* Container */
+  --container-page: 1150px;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Base                                                               */
+/* ------------------------------------------------------------------ */
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* offset for the sticky nav when jumping to anchors */
+  scroll-padding-top: 6rem;
+}
+
+body {
+  background-color: var(--color-base);
+  color: var(--color-body);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: color-mix(in srgb, var(--color-deep-indigo) 40%, transparent);
+  color: var(--color-ink);
+}
+
+/* Consistent, visible focus ring for keyboard users */
+:focus-visible {
+  outline: 2px solid var(--color-indigo);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Faint dotted grid backdrop, used behind the page */
+.bg-grid {
+  background-image: radial-gradient(
+    circle at center,
+    rgba(139, 148, 158, 0.09) 1px,
+    transparent 1px
+  );
+  background-size: 32px 32px;
+}
+
+/* Animated gradient text (hero wordmark / headline accent). Soft, high-
+   luminance cool tones so the name stays clearly legible over the scene; the
+   drift is gentle and unhurried rather than distracting. */
+.text-gradient {
+  background-image: linear-gradient(
+    100deg,
+    #e6ebff,
+    #a5b4fc 38%,
+    #bae6fd 68%,
+    #e6ebff
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 1px 30px color-mix(in srgb, var(--color-indigo) 22%, transparent);
+  animation: gradient-pan 10s linear infinite;
+}
+
+@keyframes gradient-pan {
+  to {
+    background-position: 250% center;
+  }
+}
+
+/* Soft radial glow used behind the hero */
+.hero-glow::before {
+  content: "";
+  position: absolute;
+  inset: -20% -10% auto -10%;
+  height: 520px;
+  background:
+    radial-gradient(
+      40% 60% at 30% 20%,
+      color-mix(in srgb, var(--color-deep-indigo) 26%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      35% 55% at 75% 10%,
+      color-mix(in srgb, var(--color-cyan) 16%, transparent),
+      transparent 70%
+    );
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Hairline divider with a glowing center node */
+.divider-node {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-hairline) 20%,
+    var(--color-hairline) 80%,
+    transparent
+  );
+}
+.divider-node::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  transform: translate(-50%, -50%);
+  border-radius: 9999px;
+  background: var(--color-indigo);
+  box-shadow: 0 0 12px 2px color-mix(in srgb, var(--color-indigo) 60%, transparent);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Premium glass + magnetic controls (Phase 4)                        */
+/* ------------------------------------------------------------------ */
+
+/* Premium glass surface: layered inner highlights read as a lit edge and
+   real thickness; the soft drop shadow lifts it off the page. Used on the
+   hero chip and secondary button. */
+.glass-premium {
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-surface-2) 72%, transparent),
+    color-mix(in srgb, var(--color-surface-2) 42%, transparent)
+  );
+  backdrop-filter: blur(10px) saturate(135%);
+  -webkit-backdrop-filter: blur(10px) saturate(135%);
+  border: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02),
+    0 12px 34px -16px rgba(0, 0, 0, 0.75);
+}
+
+/* Cursor glare that tracks the pointer across a magnetic control. The
+   position comes from --mx/--my (set in MagneticButton); it fades in on hover
+   and clips to the control's rounded shape via overflow-hidden. */
+.btn-magnetic {
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.btn-magnetic::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    150px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 255, 255, 0.22),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.btn-magnetic:hover::before {
+  opacity: 1;
+}
+
+/* Cursor-tracked spotlight for cards: a soft indigo glow that follows the
+   pointer and fades in on hover, clipped to the card's rounded shape. */
+.card-spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    300px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--color-indigo) 14%, transparent),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.card-spotlight:hover::before {
+  opacity: 1;
+}
+
+/* Diagonal light sweep for the solid primary button — a single luxurious pass
+   on hover. */
+.sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.28) 50%,
+    transparent 70%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.sheen:hover::after {
+  transform: translateX(130%);
+}
+
+/* Reduced motion: kill non-essential animation */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .text-gradient {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
