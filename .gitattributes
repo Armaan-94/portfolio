@@ -1,0 +1,18 @@
+# Normalise line endings so the repo is LF everywhere and Windows checkouts
+# stop emitting "LF will be replaced by CRLF" warnings on commit.
+* text=auto eol=lf
+
+# Treat known binary assets as binary (no diffing / EOL munging).
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.pdf  binary
+*.woff  binary
+*.woff2 binary
+
+# Collapse the lockfile in diffs and mark it generated so it doesn't skew
+# language stats or clutter reviews.
+package-lock.json -diff linguist-generated=true
