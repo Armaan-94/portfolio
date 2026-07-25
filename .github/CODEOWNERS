@@ -1,0 +1,3 @@
+# Default owner for everything in the repo. GitHub will auto-request review
+# from this owner on pull requests.
+* @Armaan-94
