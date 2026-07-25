@@ -1,0 +1,6 @@
+# Disable blank issues so reports use a template; offer a direct contact route.
+blank_issues_enabled: false
+contact_links:
+  - name: Contact Armaan
+    url: https://github.com/Armaan-94
+    about: For questions or private matters, reach out via the links on my profile or the contact form on the site.
