@@ -1,4 +1,5 @@
 import { leetcode } from "@/content";
+import { getLeetCodeData } from "@/lib/leetcode";
 import { Section } from "./Section";
 import { Reveal } from "./Reveal";
 import { LeetCodeIcon, ExternalIcon } from "./Icons";
@@ -13,50 +14,27 @@ const HEAT_COLORS = [
   "var(--color-hm-4)",
 ];
 
-/**
- * Deterministic illustrative heatmap. A seeded generator keeps server and
- * client renders identical (no hydration mismatch) and lands close to the
- * real ~173 active days. Not a claim of exact per-day data.
- */
-function buildHeatmap() {
-  let seed = 20260724;
-  const rand = () => {
-    // Mulberry32-style LCG, deterministic.
-    seed |= 0;
-    seed = (seed + 0x6d2b79f5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-
-  const cells: number[] = [];
-  let active = 0;
-  for (let i = 0; i < WEEKS * DAYS; i++) {
-    const r = rand();
-    // ~47% of cells active, weighted toward lighter greens.
-    let level = 0;
-    if (r > 0.53) {
-      if (r > 0.96) level = 4;
-      else if (r > 0.88) level = 3;
-      else if (r > 0.72) level = 2;
-      else level = 1;
-      active++;
-    }
-    cells.push(level);
-  }
-  return { cells, active };
-}
-
-const { cells } = buildHeatmap();
-
-const numbers = [
-  { label: "Solved", value: leetcode.solved },
-  { label: "Easy", value: leetcode.easy },
-  { label: "Medium", value: leetcode.medium },
-  { label: "Active days", value: leetcode.activeDays },
-];
-
 export function CodingActivity() {
+  // Live LeetCode data read from the committed snapshot; falls back gracefully.
+  const data = getLeetCodeData();
+  const { cells } = data;
+  const isLive = data.source === "live";
+
+  const numbers = [
+    { label: "Solved", value: data.solved },
+    { label: "Easy", value: data.easy },
+    { label: "Medium", value: data.medium },
+    { label: "Active days", value: data.activeDays },
+  ];
+
+  const subtitle =
+    `${data.submissionsPastYear} submissions in the past year` +
+    (data.streak > 0 ? ` · ${data.streak}-day streak` : "");
+
+  const heatLabel = isLive
+    ? `LeetCode submission heatmap: ${data.activeDays} active days in the past year`
+    : `Illustrative submission heatmap, roughly ${data.activeDays} active days`;
+
   return (
     <Section
       id="coding"
@@ -74,9 +52,7 @@ export function CodingActivity() {
                 </span>
                 <div>
                   <p className="font-medium text-ink">LeetCode</p>
-                  <p className="font-mono text-xs text-muted">
-                    {leetcode.submissionsPastYear} submissions in the past year
-                  </p>
+                  <p className="font-mono text-xs text-muted">{subtitle}</p>
                 </div>
               </div>
               <a
@@ -118,7 +94,7 @@ export function CodingActivity() {
                     gridTemplateRows: `repeat(${DAYS}, 11px)`,
                   }}
                   role="img"
-                  aria-label={`Illustrative submission heatmap, roughly ${leetcode.activeDays} active days over the past year`}
+                  aria-label={heatLabel}
                 >
                   {cells.map((level, i) => (
                     <span
