@@ -1,0 +1,45 @@
+name: Update LeetCode data
+
+# Refresh src/data/leetcode.json from LeetCode once a day. Runs on GitHub's
+# runners (not the deploy host), so LeetCode won't block the request. Commits
+# ONLY when the data actually changed — no empty/padding commits — and marks the
+# commit [skip ci] so it doesn't re-trigger the build pipeline. The push itself
+# triggers a Vercel redeploy, so the site picks up fresh data.
+on:
+  schedule:
+    - cron: "17 5 * * *" # daily, 05:17 UTC
+  workflow_dispatch: {} # allow manual runs
+
+concurrency:
+  group: leetcode-data
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Fetch LeetCode data
+        run: node scripts/fetch-leetcode.mjs
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- src/data/leetcode.json; then
+            echo "No LeetCode changes today — nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/leetcode.json
+          git commit -m "chore(data): refresh LeetCode activity [skip ci]"
+          git push
