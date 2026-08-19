@@ -7,6 +7,9 @@ import { particleFragmentShader, starVertexShader } from "../shaders/particles.g
 import { mulberry32, randomUnitVector } from "../util/random";
 import { scrollState } from "../interaction";
 import { perfState } from "../util/perf";
+import { loadMomentState } from "../loadMoment";
+import { sampleWordmark, displayFontFamily } from "../util/wordmark";
+import { profile } from "@/content";
 
 const INNER = 18;
 const OUTER = 44;
@@ -43,6 +46,15 @@ export function Starfield({
     g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
     g.setAttribute("aScale", new THREE.BufferAttribute(scale, 1));
     g.setAttribute("aSeed", new THREE.BufferAttribute(seed, 1));
+
+    // Wordmark slots for the load moment. Sampled once; if it fails (no 2D
+    // context, font unavailable) the attribute is all zeroes and the moment
+    // simply never has anywhere to assemble to, which <LoadMoment> detects.
+    const word = sampleWordmark(profile.name, count, displayFontFamily());
+    g.setAttribute(
+      "aWord",
+      new THREE.BufferAttribute(word ? word.points : new Float32Array(count * 2), 2)
+    );
     return g;
   }, [count]);
 
@@ -60,6 +72,9 @@ export function Starfield({
           uPixelRatio: { value: 1 },
           uColorA: { value: new THREE.Color("#cdd8ff") },
           uColorB: { value: new THREE.Color("#6366f1") },
+          uAssemble: { value: 0 },
+          uWordCenter: { value: new THREE.Vector3() },
+          uWordScale: { value: new THREE.Vector2(1, 1) },
         },
       }),
     []
@@ -82,10 +97,22 @@ export function Starfield({
     if (reduced) return;
     const dt = Math.min(delta, 1 / 30);
     material.uniforms.uTime.value += dt;
+
+    // Load moment. Publishing 0 when idle keeps the shader's branch cold.
+    material.uniforms.uAssemble.value = loadMomentState.assemble;
+    if (loadMomentState.running) {
+      material.uniforms.uWordCenter.value.copy(loadMomentState.center);
+      material.uniforms.uWordScale.value.copy(loadMomentState.scale);
+    }
+
     if (pointsRef.current) {
-      pointsRef.current.rotation.y += dt * (0.006 + scrollState.velocity * 0.04);
+      // Hold the shell still while assembling, or the wordmark would shear as
+      // the layer rotates underneath it.
+      const settle = 1 - loadMomentState.assemble;
+      pointsRef.current.rotation.y +=
+        dt * (0.006 + scrollState.velocity * 0.04) * settle;
       // Furthest layer → smallest parallax drift as the hero scrolls out.
-      pointsRef.current.position.y = scrollState.progress * 1.2;
+      pointsRef.current.position.y = scrollState.progress * 1.2 * settle;
     }
   });
 
