@@ -87,22 +87,42 @@ export const starVertexShader = /* glsl */ `
 uniform float uTime;
 uniform float uSize;
 uniform float uPixelRatio;
+uniform float uAssemble;     // 0 = scattered shell, 1 = wordmark
+uniform vec3  uWordCenter;   // world-space centre of the wordmark
+uniform vec2  uWordScale;    // world width / height to scale aWord into
 
 attribute float aScale;
 attribute float aSeed;
+attribute vec2  aWord;       // normalised position within the wordmark
 
 varying float vAlpha;
 varying float vTint;
 
 void main(){
-  vec4 mv = modelViewMatrix * vec4(position, 1.0);
+  vec3 pos = position;
+
+  // Load moment: pull each star toward its slot in the wordmark. Per-particle
+  // easing (aSeed) staggers arrival so the shape resolves rather than snapping.
+  // Zero cost once uAssemble is 0, which is every frame after the intro.
+  if (uAssemble > 0.0) {
+    float lead = clamp(uAssemble * (1.25 + aSeed * 0.5), 0.0, 1.0);
+    float k = lead * lead * (3.0 - 2.0 * lead);
+    vec3 target = uWordCenter + vec3(aWord.x * uWordScale.x,
+                                     aWord.y * uWordScale.y, 0.0);
+    pos = mix(pos, target, k);
+  }
+
+  vec4 mv = modelViewMatrix * vec4(pos, 1.0);
   gl_Position = projectionMatrix * mv;
 
   float viewDist = max(-mv.z, 0.001);
-  gl_PointSize = min(uSize * aScale * uPixelRatio / viewDist, 24.0);
+  // Cap tightens as they assemble: up close the shell's cap would blow each
+  // star into a blob and the lettering would be unreadable.
+  float cap = mix(24.0, 5.5, uAssemble);
+  gl_PointSize = min(uSize * aScale * uPixelRatio / viewDist, cap);
 
   float twinkle = 0.5 + 0.5 * sin(uTime * (0.4 + aSeed) + aSeed * 6.2831);
-  vAlpha = (0.22 + 0.5 * twinkle) * aScale;
+  vAlpha = mix((0.22 + 0.5 * twinkle) * aScale, 0.95, uAssemble);
   vTint = fract(aSeed * 2.13);
 }
 `;

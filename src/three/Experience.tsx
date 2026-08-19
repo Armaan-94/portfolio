@@ -13,6 +13,8 @@ import { Dust } from "./scene/Dust";
 import { OrbitalParticles } from "./scene/OrbitalParticles";
 import { OrbTravel } from "./scene/OrbTravel";
 import { PerfGovernor } from "./scene/PerfGovernor";
+import { LoadMoment } from "./scene/LoadMoment";
+import { LOAD_MOMENT } from "./config";
 import { getQuality, type Quality } from "./util/quality";
 
 /**
@@ -76,6 +78,9 @@ export function Experience({
         <OrbitalParticles reduced={reduced} count={quality.orbital} />
         <Orb reduced={reduced} detail={quality.orbDetail} traveling={traveling} />
       </OrbTravel>
+      <LoadMoment
+        enabled={LOAD_MOMENT && !reduced && quality.tier !== "low"}
+      />
       <Effects reduced={reduced} />
       <PerfGovernor
         maxDpr={quality.maxDpr}
