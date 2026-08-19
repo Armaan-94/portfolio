@@ -35,11 +35,11 @@ export const education = {
   degree: "B.Tech, Computer Science and Engineering",
   school: "The NorthCap University, Gurugram",
   period: "2022 - 2026",
-  cgpa: "8.79 / 10",
+  cgpa: "8.77 / 10",
 } as const;
 
 export const stats: { label: string; value: string }[] = [
-  { label: "CGPA", value: "8.79" },
+  { label: "CGPA", value: "8.77" },
   { label: "Internships", value: "5" },
   { label: "Records processed", value: "160M+" },
   { label: "Profitability lift", value: "~18%" },
@@ -59,17 +59,19 @@ export const experience: Experience[] = [
     company: "Biocipher Technologies",
     role: "Associate Executive Intern, Software Engineering",
     location: "Gurugram",
-    period: "Apr 2026 - Jul 2026",
+    period: "Apr 2026 - Aug 2026",
     bullets: [
-      "Built an AI-driven business-intelligence layer over 160M+ customer records, lifting profitability roughly 18% across financial services.",
-      "Shipped CRM integrations and AI communication modules across Voice, SMS, Email, and WhatsApp.",
+      "Built an AI-powered business-intelligence and large-scale data-processing layer over 160M+ customer records, increasing profitability by 18% across the company's financial services.",
+      "Designed and integrated scalable enterprise applications with Next.js, TypeScript, Python, DuckDB, and AI/ML workflows to automate data processing, analytics, and organization-wide insight sharing.",
+      "Engineered CRM integrations consolidating multiple business services while streamlining digital marketing and operational workflows.",
+      "Tested, optimized, and documented AI-powered Voice, SMS, Email, and WhatsApp communication modules, and wrote the technical training resources for AI automation agents.",
     ],
     stack: ["Next.js", "TypeScript", "Python", "DuckDB", "AI/ML"],
   },
   {
     company: "Dadata Consulting",
     role: "Associate Software Engineer Intern",
-    location: "US enterprise, remote",
+    location: "US-based company, remote",
     period: "Jan 2026 - Feb 2026",
     bullets: [
       "Delivered end-to-end metadata and technical-lineage migration into Collibra DGC for a US enterprise client.",
@@ -81,11 +83,11 @@ export const experience: Experience[] = [
   {
     company: "BuziBrAIns",
     role: "Software Development Engineer Intern",
-    location: "Remote",
+    location: "Bengaluru-based company, remote",
     period: "Jul 2025 - Oct 2025",
     bullets: [
-      "Turned client requirements into production ERP and CRM features.",
-      "Automated core business workflows with full-stack technologies.",
+      "Built production-ready ERP and CRM solutions by translating business requirements into scalable software features.",
+      "Automated enterprise workflows with full-stack technologies, improving operational efficiency and reducing manual processes.",
     ],
     stack: ["Full-stack", "ERP", "CRM"],
   },
@@ -124,7 +126,7 @@ export type Project = {
 
 export const projects: Project[] = [
   {
-    title: "Food-Delivery Microservices",
+    title: "Enterprise Food Delivery Microservices Platform",
     category: "Backend",
     description:
       "A distributed food-ordering backend split into independent Spring Cloud services: service discovery, API-gateway routing, a centralized config server, and Spring Security auth. My deep dive into real microservice architecture.",
@@ -144,7 +146,7 @@ export const projects: Project[] = [
     category: "Full-stack",
     description:
       "A full-stack MERN vault for reusable code snippets: syntax highlighting, search and filters over a REST API, and an animated, responsive React UI.",
-    stack: ["React", "Node.js", "Express", "MongoDB"],
+    stack: ["React", "Node.js", "Express", "MongoDB", "Tailwind"],
     code: "https://github.com/Armaan-94/developer-snippet-vault",
     live: "https://developer-snippet-vault.vercel.app",
   },
@@ -170,7 +172,7 @@ export const projects: Project[] = [
     category: "Frontend",
     description:
       "A modern, fully responsive banking landing page: a study in clean layout, spacing, and cross-device polish, taken from Figma to component-driven React.",
-    stack: ["React", "Tailwind", "JavaScript", "Figma"],
+    stack: ["React", "Tailwind", "JavaScript", "HTML", "CSS", "Figma"],
     code: "https://github.com/Armaan-94/bank_landing_page",
     live: "https://armaan-94.github.io/bank_landing_page/",
   },
@@ -209,6 +211,7 @@ export const skills: { group: string; items: string[] }[] = [
       "AWS (EC2, ECS, S3, Lambda)",
       "Docker",
       "Linux (Ubuntu)",
+      "Unix shell",
       "Bash",
       "Git",
       "GitHub",
@@ -227,11 +230,16 @@ export const skills: { group: string; items: string[] }[] = [
     ],
   },
   {
+    group: "AI Tools",
+    items: ["Claude Code", "ChatGPT", "Gemini", "Cursor", "GitHub Copilot"],
+  },
+  {
     group: "Other",
     items: [
       "Postman",
       "Collibra",
       "Data Governance",
+      "Cloud Computing",
       "SDLC",
       "Cyber Security Fundamentals",
     ],
