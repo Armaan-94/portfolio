@@ -1,7 +1,10 @@
+import type { CSSProperties } from "react";
+
 import { leetcode } from "@/content";
 import { getLeetCodeData } from "@/lib/leetcode";
 import { Section } from "./Section";
 import { Reveal } from "./Reveal";
+import { Cascade } from "./Cascade";
 import { LeetCodeIcon, ExternalIcon } from "./Icons";
 
 const WEEKS = 53;
@@ -86,7 +89,7 @@ export function CodingActivity() {
             {/* heatmap */}
             <div>
               <div className="overflow-x-auto pb-1">
-                <div
+                <Cascade
                   className="grid w-max gap-[3px]"
                   style={{
                     gridTemplateColumns: `repeat(${WEEKS}, 11px)`,
@@ -100,10 +103,15 @@ export function CodingActivity() {
                     <span
                       key={i}
                       className="h-[11px] w-[11px] rounded-[2px]"
-                      style={{ backgroundColor: HEAT_COLORS[level] }}
+                      style={
+                        {
+                          backgroundColor: HEAT_COLORS[level],
+                          "--i": i,
+                        } as CSSProperties
+                      }
                     />
                   ))}
-                </div>
+                </Cascade>
               </div>
               <div className="mt-3 flex items-center justify-between">
                 <span className="font-mono text-[11px] text-faint">
