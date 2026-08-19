@@ -9,6 +9,8 @@ import {
   useSyncExternalStore,
 } from "react";
 import { getQuality } from "./util/quality";
+import { startSectionSpy } from "./sectionSpy";
+import { TRAVELING_ORB } from "./config";
 
 /**
  * Static stand-in for the WebGL layer: the orb's glow reduced to two radial
@@ -62,10 +64,26 @@ function getReducedMotion() {
 }
 
 /**
- * Mounts the WebGL experience as an absolute layer inside its parent (the
- * hero). The heavy Three.js bundle is loaded client-side only (ssr:false), so
- * first paint (the readable hero content) is never blocked. prefers-reduced-
- * motion is tracked via useSyncExternalStore, the idiomatic subscription.
+ * Mounts the WebGL experience inside its parent (the hero). The heavy Three.js
+ * bundle is loaded client-side only (ssr:false), so first paint (the readable
+ * hero content) is never blocked. prefers-reduced-motion is tracked via
+ * useSyncExternalStore, the idiomatic subscription.
+ *
+ * In traveling mode (Phase 9) the layer switches from `absolute inset-0` to a
+ * fixed viewport-height layer, so the orb persists past the hero. The DOM
+ * position never changes, which is what makes hero parity free rather than
+ * something to be matched by hand:
+ *
+ * - Hero's `overflow-hidden` does not clip a fixed layer, because nothing on
+ *   the ancestor chain has transform / filter / perspective / contain, so the
+ *   containing block is the viewport.
+ * - Hero's `isolate` keeps the canvas inside the hero's stacking context, so
+ *   the grid, glow, scrim and content still paint in exactly the same order.
+ * - Every later section is a later sibling of the hero, so they paint above
+ *   the canvas with no z-index tuning at all.
+ *
+ * Anything that would break those invariants (a transform on Hero, main or
+ * body) is flagged by the development-only check below.
  */
 export function OrbScene() {
   const reduced = useSyncExternalStore(
@@ -88,14 +106,36 @@ export function OrbScene() {
   const [webgl, setWebgl] = useState<boolean | null>(null);
   useEffect(() => setWebgl(hasWebGL()), []);
 
+  // False through SSR and the first render, so the server and the client agree
+  // on the classic class string and there is no hydration mismatch. It also
+  // carries the parity guard: if the hero is taller than the viewport (a short
+  // window, a large default font) the fixed layer would not cover what the
+  // absolute one did, so we decline to travel rather than accept a hero that
+  // is subtly different from today's.
+  const [heroFits, setHeroFits] = useState(false);
+  useEffect(() => {
+    if (!TRAVELING_ORB) return;
+    const measure = () => {
+      const hero = ref.current?.parentElement;
+      setHeroFits(!!hero && hero.offsetHeight <= window.innerHeight * 1.02);
+    };
+    measure();
+    window.addEventListener("resize", measure, { passive: true });
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // Observe the hero section, not this layer. In traveling mode the layer is
+    // fixed and therefore always intersects the viewport, so watching it would
+    // report "in view" forever and the below-the-fold dimming would never fire.
+    // The hero is the same box in fallback mode, so this is equivalent there.
     const io = new IntersectionObserver(
       ([entry]) => setInView(entry.isIntersecting),
       { threshold: 0 }
     );
-    io.observe(el);
+    io.observe(el.parentElement ?? el);
 
     const onVisibility = () => setVisible(!document.hidden);
     document.addEventListener("visibilitychange", onVisibility);
@@ -106,13 +146,64 @@ export function OrbScene() {
     };
   }, []);
 
+  // Traveling mode is a desktop, full-motion upgrade. Every other case keeps
+  // today's behavior exactly, including the render-loop pause off the hero.
+  // Touch devices all classify as "low", which also retires the fixed +
+  // 100svh + momentum-scroll bug class on iOS.
+  const traveling =
+    TRAVELING_ORB && heroFits && !reduced && quality.tier !== "low";
+
+  useEffect(() => {
+    if (!traveling) return;
+    return startSectionSpy();
+  }, [traveling]);
+
+  // The fixed layer's correctness rests on no ancestor establishing a
+  // containing block. Catch a future transform/filter/contain the moment it
+  // lands rather than as a mystery clipping bug. Development only.
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production" || !traveling) return;
+    const risky = ["transform", "filter", "perspective", "contain"] as const;
+    let node = ref.current?.parentElement ?? null;
+    while (node && node !== document.documentElement) {
+      const style = getComputedStyle(node);
+      for (const prop of risky) {
+        const value = style.getPropertyValue(prop);
+        if (value && value !== "none" && value !== "normal") {
+          console.warn(
+            `[OrbScene] <${node.tagName.toLowerCase()}> sets ${prop}: ${value}. ` +
+              "That makes it the containing block for the fixed orb layer, " +
+              "which will clip or mis-position it. See OrbScene's docblock."
+          );
+        }
+      }
+      node = node.parentElement;
+    }
+  }, [traveling]);
+
   return (
-    <div ref={ref} aria-hidden className="absolute inset-0 z-0">
+    <div
+      ref={ref}
+      aria-hidden
+      className={
+        traveling
+          ? "fixed inset-x-0 top-0 z-0 h-[100svh] transition-opacity duration-700"
+          : "absolute inset-0 z-0"
+      }
+      style={
+        traveling && !inView
+          ? { pointerEvents: "none", opacity: 0.55 }
+          : undefined
+      }
+    >
       {webgl ? (
         <Experience
           reduced={reduced}
-          active={inView && visible}
+          // A fixed layer always intersects, so inView stops being meaningful
+          // once traveling; tab visibility becomes the only gate.
+          active={traveling ? visible : inView && visible}
           quality={quality}
+          traveling={traveling}
           onContextLost={() => setWebgl(false)}
         />
       ) : (

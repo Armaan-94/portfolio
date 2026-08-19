@@ -11,6 +11,8 @@ import { ScrollRig } from "./scene/ScrollRig";
 import { Starfield } from "./scene/Starfield";
 import { Dust } from "./scene/Dust";
 import { OrbitalParticles } from "./scene/OrbitalParticles";
+import { OrbTravel } from "./scene/OrbTravel";
+import { PerfGovernor } from "./scene/PerfGovernor";
 import { getQuality, type Quality } from "./util/quality";
 
 /**
@@ -34,11 +36,13 @@ export function Experience({
   reduced = false,
   active = true,
   quality = getQuality(),
+  traveling = false,
   onContextLost,
 }: {
   reduced?: boolean;
   active?: boolean;
   quality?: Quality;
+  traveling?: boolean;
   onContextLost?: () => void;
 }) {
   return (
@@ -62,13 +66,22 @@ export function Experience({
       }}
     >
       <PointerTracker reduced={reduced} />
-      <ScrollRig reduced={reduced} />
+      <ScrollRig reduced={reduced} page={traveling} />
       <CameraRig reduced={reduced} />
       <Starfield reduced={reduced} count={quality.stars} />
       <Dust reduced={reduced} count={quality.dust} />
-      <OrbitalParticles reduced={reduced} count={quality.orbital} />
-      <Orb reduced={reduced} detail={quality.orbDetail} />
+      {/* The swarm rides inside the travel group so it follows the orb out to
+          the margin; the atmosphere layers stay world-anchored. */}
+      <OrbTravel reduced={reduced} enabled={traveling}>
+        <OrbitalParticles reduced={reduced} count={quality.orbital} />
+        <Orb reduced={reduced} detail={quality.orbDetail} traveling={traveling} />
+      </OrbTravel>
       <Effects reduced={reduced} />
+      <PerfGovernor
+        maxDpr={quality.maxDpr}
+        enabled={!reduced}
+        threshold={quality.tier === "low" ? 34 : 46}
+      />
       <AdaptiveDpr pixelated={false} />
       <AdaptiveEvents />
     </Canvas>

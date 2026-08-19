@@ -7,7 +7,9 @@ import {
   createOrbMaterial,
   createOrbUniforms,
 } from "../materials/OrbMaterial";
-import { pointerState, scrollState } from "../interaction";
+import { pointerState, scrollState, sectionState } from "../interaction";
+import { swatchFor } from "../palettes";
+import { TRAVEL_INERT_AT } from "../config";
 
 const damp = THREE.MathUtils.damp;
 
@@ -18,6 +20,8 @@ type OrbProps = {
   detail?: number;
   /** honor prefers-reduced-motion: freeze morph, rotation, and reactions */
   reduced?: boolean;
+  /** page-wide mode: drift the palette per section and go inert off the hero */
+  traveling?: boolean;
 };
 
 /**
@@ -25,7 +29,12 @@ type OrbProps = {
  * The React layer only feeds it time, pointer, and click state; all deformation
  * and shading happen on the GPU.
  */
-export function Orb({ radius = 1.5, detail = 42, reduced = false }: OrbProps) {
+export function Orb({
+  radius = 1.5,
+  detail = 42,
+  reduced = false,
+  traveling = false,
+}: OrbProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const { camera } = useThree();
 
@@ -46,6 +55,7 @@ export function Orb({ radius = 1.5, detail = 42, reduced = false }: OrbProps) {
   const camUp = useMemo(() => new THREE.Vector3(), []);
   const frontDir = useMemo(() => new THREE.Vector3(), []);
   const invQuat = useMemo(() => new THREE.Quaternion(), []);
+  const worldPos = useMemo(() => new THREE.Vector3(), []);
 
   useFrame((state, delta) => {
     const mesh = meshRef.current;
@@ -79,7 +89,10 @@ export function Orb({ radius = 1.5, detail = 42, reduced = false }: OrbProps) {
 
     // Pointer direction, resolved in object space so the swell tracks the
     // cursor on screen even as the mesh spins underneath.
-    frontDir.copy(camera.position).sub(mesh.position).normalize();
+    // World position, not local: once <OrbTravel> translates the parent group
+    // the local position no longer describes where the orb actually is, and
+    // the swell would aim off target. Identical while the parent is identity.
+    frontDir.copy(camera.position).sub(mesh.getWorldPosition(worldPos)).normalize();
     camRight.setFromMatrixColumn(camera.matrixWorld, 0);
     camUp.setFromMatrixColumn(camera.matrixWorld, 1);
     worldTarget
@@ -91,8 +104,18 @@ export function Orb({ radius = 1.5, detail = 42, reduced = false }: OrbProps) {
     worldTarget.applyQuaternion(invQuat);
     uniforms.uPointer.value.copy(worldTarget);
 
+    // Once the orb has left the hero it is decorative. R3F only raycasts on
+    // pointer events, so if the orb slides out from under a stationary cursor
+    // no pointerout ever fires: hover would stick, and with it the "pointer"
+    // cursor, for the rest of the session. Release both explicitly.
+    const inert = traveling && scrollState.travel > TRAVEL_INERT_AT;
+    if (inert && hovered.current) {
+      hovered.current = false;
+      document.body.style.cursor = "";
+    }
+
     // Hover swells the surface; a low baseline keeps the orb always reactive.
-    const targetStrength = hovered.current ? 1.0 : 0.28;
+    const targetStrength = inert ? 0 : hovered.current ? 1.0 : 0.28;
     uniforms.uPointerStrength.value = damp(
       uniforms.uPointerStrength.value,
       targetStrength,
@@ -107,6 +130,18 @@ export function Orb({ radius = 1.5, detail = 42, reduced = false }: OrbProps) {
     // Publish hover + pulse so the orbital particles can react to the orb.
     pointerState.hoverOrb = hovered.current;
     pointerState.pulse = pulse.current;
+
+    // Per-section palette drift. Uniform *values* only, so the fragment stage
+    // does exactly the same work it did before: free on the GPU. Color.lerp
+    // mutates in place, so this allocates nothing.
+    if (traveling) {
+      const swatch = swatchFor(sectionState.id);
+      const k = 1 - Math.exp(-2.2 * dt);
+      uniforms.uColorDeep.value.lerp(swatch.deep, k);
+      uniforms.uColorBlue.value.lerp(swatch.blue, k);
+      uniforms.uColorCyan.value.lerp(swatch.cyan, k);
+      uniforms.uColorViolet.value.lerp(swatch.violet, k);
+    }
 
     // Glow lifts slightly on hover.
     uniforms.uGlow.value = damp(

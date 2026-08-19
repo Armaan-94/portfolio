@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { dustVertexShader, particleFragmentShader } from "../shaders/particles.glsl";
 import { mulberry32, randomUnitVector } from "../util/random";
 import { pointerState, scrollState } from "../interaction";
+import { perfState } from "../util/perf";
 
 const R_MIN = 3;
 const R_MAX = 15;
@@ -74,7 +75,19 @@ export function Dust({
     []
   );
 
+  // Last perf step applied to the draw range. Integer compare per frame; the
+  // block below is a no-op until the governor actually steps down.
+  const perfVersion = useRef(-1);
+
   useFrame((state, delta) => {
+    if (perfVersion.current !== perfState.version) {
+      perfVersion.current = perfState.version;
+      geometry.setDrawRange(
+        0,
+        Math.max(32, Math.floor(count * perfState.particleScale))
+      );
+    }
+
     const u = material.uniforms;
     u.uPixelRatio.value = state.gl.getPixelRatio();
     u.uAspect.value = state.size.width / state.size.height;
