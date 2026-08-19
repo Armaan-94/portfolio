@@ -17,13 +17,17 @@ export const TRAVELING_ORB = true;
  * the same scroll position. This is the same normalisation `progress` already
  * uses, just over a longer span.
  */
-export const TRAVEL_SPAN = 1.6;
+export const TRAVEL_SPAN = 1.05;
 
 /** Orb size at the end of the journey, as a fraction of its hero size. */
-export const AMBIENT_SCALE = 0.42;
+export const AMBIENT_SCALE = 0.34;
 
-/** Fraction of travel spent still glued to the hero composition. */
-export const TRAVEL_EASE_START = 0.22;
+/**
+ * Fraction of travel spent still glued to the hero composition. Kept small:
+ * the orb has to be out of the way by the time the reader reaches the About
+ * copy, or it sits behind body text and hurts contrast.
+ */
+export const TRAVEL_EASE_START = 0.06;
 
 /** Past this much travel the orb is decorative: no hover, no cursor change. */
 export const TRAVEL_INERT_AT = 0.18;

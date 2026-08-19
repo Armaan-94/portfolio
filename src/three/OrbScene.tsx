@@ -192,7 +192,7 @@ export function OrbScene() {
       }
       style={
         traveling && !inView
-          ? { pointerEvents: "none", opacity: 0.55 }
+          ? { pointerEvents: "none", opacity: 0.38 }
           : undefined
       }
     >

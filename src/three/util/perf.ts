@@ -12,25 +12,29 @@ export const perfState = {
   level: 0,
   dprScale: 1,
   particleScale: 1,
-  bloomScale: 1,
   version: 0,
 };
 
 /**
  * Successive degradations. DPR first and hardest: the orb is fragment-bound
  * (six envColor evaluations plus flowNoise per pixel), so resolution is by far
- * the dominant lever.
+ * the dominant lever, and it alone carries most of the win.
  *
  * Note what is absent. Orb detail is baked into a useMemo'd geometry keyed on
  * [radius, detail], so changing it would remount the mesh, and remount thrash
  * under load costs more than the frame it saves. Effect multisampling would
  * rebuild the composer for the same reason.
+ *
+ * Bloom intensity is absent too, and that one is empirical: attaching a ref to
+ * <Bloom> so it could be mutated imperatively made r3f's reconciler throw
+ * ("Converting circular structure to JSON") on mount. Driving it by prop would
+ * rebuild the effect chain on every step, which is worse than not touching it.
  */
 const STEPS = [
-  { dprScale: 1, particleScale: 1, bloomScale: 1 },
-  { dprScale: 0.85, particleScale: 0.75, bloomScale: 0.85 },
-  { dprScale: 0.7, particleScale: 0.5, bloomScale: 0.6 },
-  { dprScale: 0.55, particleScale: 0.3, bloomScale: 0.4 },
+  { dprScale: 1, particleScale: 1 },
+  { dprScale: 0.85, particleScale: 0.75 },
+  { dprScale: 0.7, particleScale: 0.5 },
+  { dprScale: 0.55, particleScale: 0.3 },
 ];
 
 export const MAX_PERF_LEVEL = STEPS.length - 1;
