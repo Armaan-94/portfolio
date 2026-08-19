@@ -2,6 +2,7 @@ import { experience } from "@/content";
 import { Section } from "./Section";
 import { Reveal } from "./Reveal";
 import { Chip } from "./Chip";
+import { SpotlightCard } from "./SpotlightCard";
 
 export function Experience() {
   return (
@@ -28,8 +29,8 @@ export function Experience() {
             </span>
 
             <Reveal delay={i * 0.04}>
-              <div className="rounded-xl border border-hairline bg-gradient-to-b from-surface to-surface-2 p-5 transition-colors hover:border-indigo/40 sm:p-6">
-                <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+              <SpotlightCard className="relative overflow-hidden rounded-xl border border-hairline bg-gradient-to-b from-surface to-surface-2 p-5 transition-colors hover:border-indigo/40 sm:p-6">
+                <div className="relative flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
                   <h3 className="text-lg font-semibold text-ink sm:text-xl">
                     {job.company}
                   </h3>
@@ -37,12 +38,12 @@ export function Experience() {
                     {job.period}
                   </span>
                 </div>
-                <p className="mt-0.5 text-sm text-body">
+                <p className="relative mt-0.5 text-sm text-body">
                   {job.role}
                   <span className="text-faint"> · {job.location}</span>
                 </p>
 
-                <ul className="mt-4 space-y-2">
+                <ul className="relative mt-4 space-y-2">
                   {job.bullets.map((b, bi) => (
                     <li key={bi} className="flex gap-2.5 text-sm leading-relaxed text-body">
                       <span
@@ -54,12 +55,12 @@ export function Experience() {
                   ))}
                 </ul>
 
-                <div className="mt-4 flex flex-wrap gap-1.5">
+                <div className="relative mt-4 flex flex-wrap gap-1.5">
                   {job.stack.map((s) => (
                     <Chip key={s}>{s}</Chip>
                   ))}
                 </div>
-              </div>
+              </SpotlightCard>
             </Reveal>
           </li>
         ))}

@@ -10,11 +10,44 @@ import {
 } from "react";
 import { getQuality } from "./util/quality";
 
+/**
+ * Static stand-in for the WebGL layer: the orb's glow reduced to two radial
+ * gradients. Shown while the Three.js chunk downloads, and kept permanently if
+ * WebGL is unavailable or the GL context is lost, so the hero always has depth
+ * behind the wordmark instead of flat black.
+ */
+function OrbFallback() {
+  return (
+    <div
+      aria-hidden
+      className="absolute inset-0"
+      style={{
+        background:
+          "radial-gradient(38% 38% at 50% 44%, color-mix(in srgb, var(--color-deep-indigo) 30%, transparent), transparent 70%)," +
+          "radial-gradient(26% 26% at 58% 54%, color-mix(in srgb, var(--color-cyan) 18%, transparent), transparent 70%)",
+        filter: "blur(14px)",
+      }}
+    />
+  );
+}
+
 // WebGL must never render on the server; load it only in the browser.
 const Experience = dynamic(
   () => import("./Experience").then((m) => m.Experience),
-  { ssr: false }
+  { ssr: false, loading: () => <OrbFallback /> }
 );
+
+/** Cheap one-off probe: can this browser give us a GL context at all? */
+function hasWebGL() {
+  try {
+    const probe = document.createElement("canvas");
+    return Boolean(
+      probe.getContext("webgl2") ?? probe.getContext("webgl")
+    );
+  } catch {
+    return false;
+  }
+}
 
 const REDUCED_QUERY = "(prefers-reduced-motion: reduce)";
 
@@ -50,6 +83,11 @@ export function OrbScene() {
   const [inView, setInView] = useState(true);
   const [visible, setVisible] = useState(true);
 
+  // null while unprobed. The dynamic import is async anyway, so the extra tick
+  // costs nothing visible and saves throwing inside r3f on a GL-less browser.
+  const [webgl, setWebgl] = useState<boolean | null>(null);
+  useEffect(() => setWebgl(hasWebGL()), []);
+
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -70,7 +108,16 @@ export function OrbScene() {
 
   return (
     <div ref={ref} aria-hidden className="absolute inset-0 z-0">
-      <Experience reduced={reduced} active={inView && visible} quality={quality} />
+      {webgl ? (
+        <Experience
+          reduced={reduced}
+          active={inView && visible}
+          quality={quality}
+          onContextLost={() => setWebgl(false)}
+        />
+      ) : (
+        <OrbFallback />
+      )}
     </div>
   );
 }

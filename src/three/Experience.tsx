@@ -25,15 +25,21 @@ import { getQuality, type Quality } from "./util/quality";
  *
  * `active` is false once the hero scrolls out of view; the render loop then
  * drops to "demand" and the expensive orb shader stops running off-screen.
+ *
+ * `onContextLost` fires if the browser drops the GL context (a tab left for
+ * hours, a GPU reset, a driver hiccup). The caller swaps in the CSS backdrop
+ * rather than leaving a dead black rectangle where the orb was.
  */
 export function Experience({
   reduced = false,
   active = true,
   quality = getQuality(),
+  onContextLost,
 }: {
   reduced?: boolean;
   active?: boolean;
   quality?: Quality;
+  onContextLost?: () => void;
 }) {
   return (
     <Canvas
@@ -46,6 +52,14 @@ export function Experience({
       }}
       camera={{ position: [0, 0, 5], fov: 42, near: 0.1, far: 100 }}
       frameloop={reduced || !active ? "demand" : "always"}
+      onCreated={({ gl }) => {
+        if (!onContextLost) return;
+        gl.domElement.addEventListener("webglcontextlost", (event) => {
+          // Stop the browser restoring a context we are about to unmount.
+          event.preventDefault();
+          onContextLost();
+        });
+      }}
     >
       <PointerTracker reduced={reduced} />
       <ScrollRig reduced={reduced} />
