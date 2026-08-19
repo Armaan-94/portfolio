@@ -37,3 +37,18 @@ export const TRAVEL_OFFSET = {
   landscape: { x: 0.7, y: 0.2 },
   portrait: { x: 0.24, y: 0.52 },
 } as const;
+
+/**
+ * The one-shot intro in which the starfield converges into the wordmark, holds,
+ * and scatters back to its shell.
+ *
+ * OFF by default, deliberately. The implementation is complete (see
+ * scene/LoadMoment.tsx, util/wordmark.ts and the uAssemble branch in the star
+ * vertex shader) but it has not been watched running end to end, and an
+ * unverified animation on first paint is the wrong thing to gamble on a
+ * portfolio's first impression. Flip this to true, load the page in a fresh
+ * session, and judge it; everything else about it is already guarded (skipped
+ * under reduced motion, on the low tier, after the first view in a session, and
+ * on any deliberate input).
+ */
+export const LOAD_MOMENT = false;

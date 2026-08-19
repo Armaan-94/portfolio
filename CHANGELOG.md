@@ -23,6 +23,8 @@ to follow [Semantic Versioning](https://semver.org/).
 - CSS fallback for the canvas: shown while the Three.js chunk loads, when WebGL
   is unavailable, and if the GL context is lost.
 - Optional `blur`, `scale`, `variant` and `duration` props on `Reveal`.
+- Load moment (starfield converges into the wordmark, then scatters), built but
+  disabled behind `LOAD_MOMENT` in `src/three/config.ts` pending a look.
 - Repository engineering: CI (lint / type-check / build), CodeQL, Dependabot,
   community health files, `.editorconfig`, `.gitattributes`, formatting config,
   and this changelog.

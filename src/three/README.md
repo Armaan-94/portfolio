@@ -100,6 +100,15 @@ stay in separate files without needing a bundler GLSL loader.
   drifting to the margin, with its palette drifting per section. Adds a runtime
   FPS governor. See the two invariants below.
 
+- **Phase 10 - built, disabled.** The load moment: the starfield converges into
+  the wordmark, holds, and scatters back. Complete but shipped behind
+  `LOAD_MOMENT = false` in `config.ts`, because it has not been watched running
+  end to end. Turn it on, load a fresh session, and judge it. The wordmark
+  shape comes from `util/wordmark.ts` (text sampled to a point cloud once) and
+  is placed by measuring the real `<h1>` and projecting its box to the orb's
+  depth, so it lands on the name at any viewport size. The lerp is a `uAssemble`
+  branch in the star vertex shader: vertex work only, no new fragment cost.
+
 ### Phase 9 invariants
 
 **The canvas must stay a child of the hero.** In traveling mode it is
