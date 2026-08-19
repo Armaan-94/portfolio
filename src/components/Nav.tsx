@@ -54,6 +54,12 @@ export function Nav() {
           : "border-b border-transparent"
       }`}
     >
+      {/* Reading progress. Scroll-driven and compositor-only where supported;
+          rests at scaleX(0) and is simply never seen where it is not. */}
+      <span
+        aria-hidden
+        className="scroll-progress absolute inset-x-0 bottom-0 h-px origin-left bg-gradient-to-r from-indigo via-violet to-cyan"
+      />
       <nav
         aria-label="Primary"
         className="mx-auto flex h-16 max-w-[var(--container-page)] items-center justify-between px-6 sm:px-8"

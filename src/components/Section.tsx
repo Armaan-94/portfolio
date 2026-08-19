@@ -29,7 +29,7 @@ export function Section({
           <span className="font-mono text-xs tracking-[0.2em] text-cyan uppercase">
             {eyebrow}
           </span>
-          <span className="h-px flex-1 bg-hairline" aria-hidden />
+          <span className="rule-draw h-px flex-1 bg-hairline" aria-hidden />
         </div>
         <h2 className="mt-4 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
           {title}

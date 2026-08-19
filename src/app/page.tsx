@@ -16,7 +16,7 @@ export default function Home() {
         <Hero />
         <About />
         <div className="mx-auto max-w-[var(--container-page)] px-6 sm:px-8">
-          <div className="divider-node" />
+          <div className="divider-node scroll-rise" />
         </div>
         <Experience />
         <Projects />

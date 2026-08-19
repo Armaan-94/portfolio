@@ -35,6 +35,10 @@
 
   /* Container */
   --container-page: 1150px;
+
+  /* House easing. Mirrored as the EASE constant in components/Reveal.tsx and
+     the literal in the .sheen transition below; new work should use this. */
+  --ease-house: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ------------------------------------------------------------------ */
@@ -240,6 +244,108 @@ body {
 }
 .sheen:hover::after {
   transform: translateX(130%);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Scroll-driven choreography (Phase 8)                               */
+/* ------------------------------------------------------------------ */
+
+/* Progressive enhancement. Where the browser supports scroll-driven
+   animations these run on the compositor, off the main thread, with no JS and
+   no bundle cost. Where it does not, the @supports blocks are ignored whole
+   and the existing <Reveal> (motion whileInView) stays the path. Every
+   element's resting state is the finished state, so an unsupporting browser
+   simply shows the content. Nothing here replaces anything. */
+
+@keyframes scroll-rise {
+  from {
+    opacity: 0;
+    translate: 0 28px;
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+@keyframes heat-in {
+  from {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes rule-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Heatmap cascade. Armed and run by <Cascade>; see that component for why
+   this is observer-driven rather than scroll-driven. 371 cells x 1.6ms lands
+   the whole sweep just inside one second. */
+.cascade-armed > span {
+  opacity: 0;
+}
+
+.cascade-run > span {
+  animation: heat-in 420ms var(--ease-house) both;
+  animation-delay: calc(var(--i, 0) * 1.6ms);
+}
+
+@keyframes scroll-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Reading-progress hairline under the nav. Rests at scaleX(0), so where
+   scroll timelines are unsupported it is simply never seen. */
+.scroll-progress {
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-progress {
+      animation: scroll-progress linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-rise {
+      animation: scroll-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 8% cover 32%;
+    }
+
+    /* Section eyebrow hairline draws itself in. This sits on a child of the
+       <Reveal> wrapper rather than on the wrapper itself, so the CSS
+       animation and motion's inline styles never touch the same element. */
+    .rule-draw {
+      transform-origin: 0 50%;
+      animation: rule-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 24%;
+    }
+
+  }
 }
 
 /* Reduced motion: kill non-essential animation */
