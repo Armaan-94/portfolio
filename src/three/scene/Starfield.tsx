@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { particleFragmentShader, starVertexShader } from "../shaders/particles.glsl";
 import { mulberry32, randomUnitVector } from "../util/random";
 import { scrollState } from "../interaction";
+import { perfState } from "../util/perf";
 
 const INNER = 18;
 const OUTER = 44;
@@ -64,7 +65,19 @@ export function Starfield({
     []
   );
 
+  // Last perf step applied to the draw range. Integer compare per frame; the
+  // block below is a no-op until the governor actually steps down.
+  const perfVersion = useRef(-1);
+
   useFrame((state, delta) => {
+    if (perfVersion.current !== perfState.version) {
+      perfVersion.current = perfState.version;
+      geometry.setDrawRange(
+        0,
+        Math.max(32, Math.floor(count * perfState.particleScale))
+      );
+    }
+
     material.uniforms.uPixelRatio.value = state.gl.getPixelRatio();
     if (reduced) return;
     const dt = Math.min(delta, 1 / 30);

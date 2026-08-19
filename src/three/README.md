@@ -89,8 +89,56 @@ stay in separate files without needing a bundler GLSL loader.
   hero is off-screen or the tab is hidden, reduced-motion verified end to end.
   Production build passes clean.
 
+- **Phase 8 - done.** Motion polish outside the canvas: `Reveal` gained
+  optional blur/scale/wipe, scroll-driven CSS (nav reading progress, section
+  rule draw) behind `@supports (animation-timeline: ...)`, an observer-driven
+  cascade on the LeetCode heatmap, card spotlights extended to Skills and
+  Experience, and a CSS fallback for the canvas while it loads, when WebGL is
+  missing, and on context loss.
+- **Phase 9 - done.** The traveling orb. The canvas becomes a fixed
+  viewport-height layer so the orb persists past the hero, shrinking and
+  drifting to the margin, with its palette drifting per section. Adds a runtime
+  FPS governor. See the two invariants below.
+
+### Phase 9 invariants
+
+**The canvas must stay a child of the hero.** In traveling mode it is
+`position: fixed`, and its correctness rests on the DOM position never
+changing:
+
+- Nothing on the ancestor chain may set `transform`, `filter`, `perspective`
+  or `contain`. Any of those would become the containing block, and the layer
+  would be clipped by the hero's `overflow-hidden`. `OrbScene` walks the
+  ancestors in development and warns if this is ever broken.
+- The hero's `isolate` is load-bearing. It keeps the canvas inside the hero's
+  stacking context, so the grid, glow, scrim and content still paint in the
+  same order, and every later section paints above the canvas with no z-index
+  tuning.
+
+**Travel is normalised in viewport units, not document length.** `travel` uses
+`TRAVEL_SPAN` viewports; `pageProgress` exists for long-range ambience only.
+Keying the orb's position to document height would move it whenever the
+LeetCode snapshot changes the page height.
+
+**Traveling is a mid/high-tier, full-motion upgrade.** Reduced motion, the
+`low` tier (every touch device), and a hero taller than the viewport all fall
+back to the original absolute layer, including the render-loop pause when the
+hero leaves the viewport. `TRAVELING_ORB` in `config.ts` disables the whole
+system.
+
 ## Performance targets
 
-60+ FPS desktop, 30+ FPS laptops. Levers: `dpr={[1,2]}`, `<AdaptiveDpr>`,
-`<AdaptiveEvents>`, a single high-density mesh (icosahedron detail 64), and
-GPU-side displacement. LOD and instancing arrive with the particle systems.
+60+ FPS desktop, 30+ FPS laptops. Levers: the `dpr` ceiling, `<AdaptiveDpr>`,
+`<AdaptiveEvents>`, a single high-density mesh, and GPU-side displacement.
+
+`<PerfGovernor>` adds a runtime backstop on top of the device-tier heuristic:
+it samples frame rate in one-second windows and, after two consecutive slow
+ones, ratchets quality down a step (dpr, then particle draw range, then bloom).
+It never steps back up within a session, which removes oscillation as a failure
+mode rather than trying to damp it. Orb detail is deliberately not a lever: the
+geometry is memoised on `[radius, detail]`, so changing it would remount the
+mesh, and remount thrash under load costs more than it saves.
+
+The orb fragment stage is the ceiling: six `envColor` evaluations per pixel
+plus `flowNoise`. Add per-pixel work only with measurements in hand. Uniform
+*values* (the per-section palette) are free by comparison.
