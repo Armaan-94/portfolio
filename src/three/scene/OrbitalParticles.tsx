@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { orbitalVertexShader, particleFragmentShader } from "../shaders/particles.glsl";
 import { mulberry32, randomUnitVector } from "../util/random";
 import { pointerState } from "../interaction";
+import { perfState } from "../util/perf";
 
 const damp = THREE.MathUtils.damp;
 
@@ -94,7 +95,19 @@ export function OrbitalParticles({
     []
   );
 
+  // Last perf step applied to the draw range. Integer compare per frame; the
+  // block below is a no-op until the governor actually steps down.
+  const perfVersion = useRef(-1);
+
   useFrame((state, delta) => {
+    if (perfVersion.current !== perfState.version) {
+      perfVersion.current = perfState.version;
+      geometry.setDrawRange(
+        0,
+        Math.max(32, Math.floor(count * perfState.particleScale))
+      );
+    }
+
     const u = material.uniforms;
     u.uPixelRatio.value = state.gl.getPixelRatio();
     u.uPulse.value = pointerState.pulse;

@@ -28,4 +28,26 @@ export const pointerState = {
 export const scrollState = {
   progress: 0,
   velocity: 0,
+
+  // ---- Phase 9 additions. All inert unless <ScrollRig page> is mounted. ----
+
+  /**
+   * 0..1 over TRAVEL_SPAN viewports. Drives the orb's journey out to the
+   * margin. Viewport-normalised on purpose, so a change in document height
+   * (the LeetCode snapshot growing the page) never moves the orb.
+   */
+  travel: 0,
+  /** 0..1 across the whole document. Damped. Long-range ambience only. */
+  pageProgress: 0,
+  /** Undamped pageProgress, for thresholds. Never drive motion from this. */
+  pageRaw: 0,
+};
+
+/**
+ * Which section the reader is currently in, mirrored out of the shared
+ * scrollspy so `useFrame` callbacks can read it without a React subscription.
+ * Same plain-singleton pattern as {@link pointerState}.
+ */
+export const sectionState = {
+  id: "hero",
 };
