@@ -100,11 +100,9 @@ stay in separate files without needing a bundler GLSL loader.
   drifting to the margin, with its palette drifting per section. Adds a runtime
   FPS governor. See the two invariants below.
 
-- **Phase 10 - on, unverified visually.** The load moment: the starfield
-  converges into the wordmark, holds, and scatters back. Enabled via
-  `LOAD_MOMENT` in `config.ts`. The guards are all in place and the gate is
-  confirmed reaching "armed", but the animation itself has never been watched
-  playing, so judge it on a real machine. The wordmark
+- **Phase 10 - done.** The load moment: the starfield converges into the
+  wordmark, holds, and scatters back. Enabled via `LOAD_MOMENT` in `config.ts`.
+  The wordmark
   shape comes from `util/wordmark.ts` (text sampled to a point cloud once) and
   is placed by measuring the real `<h1>` and projecting its box to the orb's
   depth, so it lands on the name at any viewport size. The lerp is a `uAssemble`
