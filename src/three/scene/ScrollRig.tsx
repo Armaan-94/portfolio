@@ -55,6 +55,7 @@ export function ScrollRig({
       scrollState.progress = 0;
       scrollState.velocity = 0;
       scrollState.travel = 0;
+      scrollState.travelRaw = 0;
       scrollState.pageProgress = 0;
       scrollState.pageRaw = 0;
       return;
@@ -82,6 +83,7 @@ export function ScrollRig({
     // Softer damping than progress: the journey should glide, and it turns the
     // smooth-scroll anchor jumps into a sweep rather than a teleport.
     const rawTravel = Math.min(Math.max(y / (vh * TRAVEL_SPAN), 0), 1);
+    scrollState.travelRaw = rawTravel;
     scrollState.travel = damp(scrollState.travel, rawTravel, 3.2, dt);
 
     const rawPage = Math.min(Math.max(y / maxScroll.current, 0), 1);
