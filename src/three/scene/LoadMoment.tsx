@@ -11,6 +11,30 @@ import {
 
 const DEG2RAD = Math.PI / 180;
 
+/**
+ * Development aid: the moment is brief, self-disabling and easy to miss, so it
+ * publishes what it actually did rather than leaving it to guesswork. Module
+ * scope, so it is not a hook dependency.
+ */
+function publish(
+  state: string,
+  enabled: boolean,
+  skipped: boolean,
+  peak: number,
+  elapsed: number
+) {
+  if (process.env.NODE_ENV === "production") return;
+  (window as Window & { __loadMoment?: unknown }).__loadMoment = {
+    state,
+    enabled,
+    skipped,
+    peakAssemble: Number(peak.toFixed(3)),
+    elapsed: Number(elapsed.toFixed(2)),
+    wordScale: loadMomentState.scale.x,
+    wordCenter: loadMomentState.center.toArray(),
+  };
+}
+
 const ASSEMBLE = 0.85; // seconds converging
 const HOLD = 0.55; // seconds held as the wordmark
 const RELEASE = 0.8; // seconds scattering back out
@@ -37,13 +61,22 @@ export function LoadMoment({ enabled = false }: { enabled?: boolean }) {
   const elapsed = useRef(0);
   const done = useRef(!enabled);
   const skipped = useRef(false);
+  const peak = useRef(0);
+
+  const report = (state: string) =>
+    publish(state, enabled, skipped.current, peak.current, elapsed.current);
 
   useEffect(() => {
-    if (!enabled) return;
-    if (loadMomentAlreadyPlayed()) {
-      done.current = true;
+    if (!enabled) {
+      publish("disabled", enabled, false, 0, 0);
       return;
     }
+    if (loadMomentAlreadyPlayed()) {
+      done.current = true;
+      publish("skipped:already-played", enabled, false, 0, 0);
+      return;
+    }
+    publish("armed", enabled, false, 0, 0);
     // The <h1> is measured lazily in the frame loop, so nothing to set up here
     // beyond the skip listeners and the session flag.
     markLoadMomentPlayed();
@@ -73,6 +106,7 @@ export function LoadMoment({ enabled = false }: { enabled?: boolean }) {
       done.current = true;
       loadMomentState.assemble = 0;
       loadMomentState.running = false;
+      report(heading ? "aborted:no-perspective-camera" : "aborted:no-heading");
       return;
     }
 
@@ -111,11 +145,13 @@ export function LoadMoment({ enabled = false }: { enabled?: boolean }) {
     }
 
     loadMomentState.assemble = assemble;
+    if (assemble > peak.current) peak.current = assemble;
 
     if ((skipped.current && assemble <= 0) || t >= TOTAL) {
       loadMomentState.assemble = 0;
       loadMomentState.running = false;
       done.current = true;
+      report(skipped.current ? "finished:skipped" : "finished");
     }
   });
 

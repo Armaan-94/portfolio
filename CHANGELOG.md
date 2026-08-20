@@ -23,20 +23,30 @@ to follow [Semantic Versioning](https://semver.org/).
 - CSS fallback for the canvas: shown while the Three.js chunk loads, when WebGL
   is unavailable, and if the GL context is lost.
 - Optional `blur`, `scale`, `variant` and `duration` props on `Reveal`.
-- Load moment (starfield converges into the wordmark, then scatters), built but
-  disabled behind `LOAD_MOMENT` in `src/three/config.ts` pending a look.
+- Load moment: the starfield converges into the wordmark, holds, then scatters.
+  Once per session, skipped under reduced motion, on touch devices, and on any
+  deliberate input.
 - Repository engineering: CI (lint / type-check / build), CodeQL, Dependabot,
   community health files, `.editorconfig`, `.gitattributes`, formatting config,
   and this changelog.
 
 ### Changed
 
+- About no longer restates the CGPA in the education line directly above the
+  stat card that already shows it.
 - Résumé PDF and site content updated to the latest résumé: CGPA 8.77,
   Biocipher tenure through Aug 2026, expanded Biocipher bullets, and an AI
   Tools skill group.
 
 ### Fixed
 
+- The traveling orb and the load moment were gated on the render quality tier,
+  which drops to `low` on any viewport under 700px on its smaller side. Both
+  silently did nothing in an ordinary windowed browser. They now gate on device
+  capability instead, so viewport size no longer disables them.
+- The canvas now fades as the orb travels, driven per frame from the raw scroll
+  position. Previously it dimmed only once the hero had fully left the viewport,
+  by which point the orb was washing out the first paragraphs of About.
 - `SpotlightCard` no longer calls `getBoundingClientRect` on every pointer
   move; the box is cached and invalidated on scroll and resize.
 - The orb releases hover and restores the cursor when it travels out of the

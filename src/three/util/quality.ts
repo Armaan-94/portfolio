@@ -20,16 +20,45 @@ const PRESETS: Record<Quality["tier"], Quality> = {
   high: { tier: "high", orbDetail: 44, stars: 850, dust: 360, orbital: 240, maxDpr: 1.75 },
 };
 
+function cores() {
+  return navigator.hardwareConcurrency ?? 8;
+}
+
+function memory() {
+  // deviceMemory is non-standard (Chromium only); default generously.
+  return (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
+}
+
+function coarsePointer() {
+  return window.matchMedia?.("(pointer: coarse)").matches ?? false;
+}
+
 export function getQuality(): Quality {
   if (typeof window === "undefined") return PRESETS.high;
 
-  const cores = navigator.hardwareConcurrency ?? 8;
-  // deviceMemory is non-standard (Chromium only); default generously.
-  const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
-  const coarse = window.matchMedia?.("(pointer: coarse)").matches ?? false;
   const small = Math.min(window.innerWidth, window.innerHeight) < 700;
 
-  if (coarse || small || cores <= 4 || mem <= 4) return PRESETS.low;
-  if (cores <= 8) return PRESETS.mid;
+  if (coarsePointer() || small || cores() <= 4 || memory() <= 4) {
+    return PRESETS.low;
+  }
+  if (cores() <= 8) return PRESETS.mid;
   return PRESETS.high;
+}
+
+/**
+ * Whether this device should get the traveling orb.
+ *
+ * Deliberately NOT "tier is not low". The tier drops to low on any viewport
+ * whose smaller side is under 700px, which is the right call for render cost
+ * but wrong as a travel gate: it disables the effect on perfectly capable
+ * desktops in a half-height window. What travel actually needs to avoid is a
+ * touch device, where `position: fixed` plus 100svh plus momentum scrolling is
+ * a bug farm, and hardware too weak to render continuously past the hero.
+ *
+ * So: a fine pointer, and not obviously underpowered. Viewport size is
+ * irrelevant here; the quality tier still scales the render either way.
+ */
+export function canTravel(): boolean {
+  if (typeof window === "undefined") return false;
+  return !coarsePointer() && cores() > 4 && memory() > 4;
 }

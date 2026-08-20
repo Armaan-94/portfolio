@@ -37,6 +37,13 @@ export const scrollState = {
    * (the LeetCode snapshot growing the page) never moves the orb.
    */
   travel: 0,
+  /**
+   * Undamped `travel`. Used for the canvas fade: damping is right for motion,
+   * because it gives the journey inertia, but wrong for legibility, because a
+   * fast scroll would outrun the fade and leave the orb washing out the copy
+   * for a few hundred milliseconds.
+   */
+  travelRaw: 0,
   /** 0..1 across the whole document. Damped. Long-range ambience only. */
   pageProgress: 0,
   /** Undamped pageProgress, for thresholds. Never drive motion from this. */
@@ -51,3 +58,12 @@ export const scrollState = {
 export const sectionState = {
   id: "hero",
 };
+
+/**
+ * The DOM element wrapping the canvas, published so the render loop can fade
+ * it as the orb travels. A per-frame style write is far cheaper than a
+ * per-frame React render, and the alternative (a binary class toggle keyed to
+ * the hero leaving view) dimmed too late and let the orb wash out the copy it
+ * was passing behind.
+ */
+export const orbLayer: { el: HTMLElement | null } = { el: null };

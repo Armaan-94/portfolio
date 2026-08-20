@@ -8,8 +8,9 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { getQuality } from "./util/quality";
+import { getQuality, canTravel } from "./util/quality";
 import { startSectionSpy } from "./sectionSpy";
+import { orbLayer } from "./interaction";
 import { TRAVELING_ORB } from "./config";
 
 /**
@@ -107,17 +108,20 @@ export function OrbScene() {
   useEffect(() => setWebgl(hasWebGL()), []);
 
   // False through SSR and the first render, so the server and the client agree
-  // on the classic class string and there is no hydration mismatch. It also
-  // carries the parity guard: if the hero is taller than the viewport (a short
-  // window, a large default font) the fixed layer would not cover what the
-  // absolute one did, so we decline to travel rather than accept a hero that
-  // is subtly different from today's.
-  const [heroFits, setHeroFits] = useState(false);
+  // on the classic class string and there is no hydration mismatch.
+  //
+  // The measurement is a parity guard, not a capability check: if the hero is
+  // much taller than the viewport, a fixed 100svh layer sits noticeably higher
+  // within it than the absolute layer did, and the hero would not look the
+  // same. A hero slightly over one viewport is fine, because the overflow was
+  // below the fold and unseen either way, so the tolerance is generous.
+  const [eligible, setEligible] = useState(false);
   useEffect(() => {
     if (!TRAVELING_ORB) return;
     const measure = () => {
       const hero = ref.current?.parentElement;
-      setHeroFits(!!hero && hero.offsetHeight <= window.innerHeight * 1.02);
+      const fits = !!hero && hero.offsetHeight <= window.innerHeight * 1.25;
+      setEligible(fits && canTravel());
     };
     measure();
     window.addEventListener("resize", measure, { passive: true });
@@ -146,12 +150,39 @@ export function OrbScene() {
     };
   }, []);
 
-  // Traveling mode is a desktop, full-motion upgrade. Every other case keeps
-  // today's behavior exactly, including the render-loop pause off the hero.
-  // Touch devices all classify as "low", which also retires the fixed +
+  // Traveling mode is a fine-pointer, full-motion upgrade. Every other case
+  // keeps today's behavior exactly, including the render-loop pause off the
+  // hero. Touch devices are excluded by canTravel(), which retires the fixed +
   // 100svh + momentum-scroll bug class on iOS.
-  const traveling =
-    TRAVELING_ORB && heroFits && !reduced && quality.tier !== "low";
+  const traveling = TRAVELING_ORB && eligible && !reduced;
+
+  // Development aid: the travel gate has several independent inputs and a
+  // silent "no" is hard to diagnose from the outside. Publish the decision so
+  // it can be inspected from the console.
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    (window as Window & { __orb?: unknown }).__orb = {
+      traveling,
+      reasons: {
+        flagEnabled: TRAVELING_ORB,
+        eligible,
+        reducedMotion: reduced,
+        canTravel: canTravel(),
+        tier: quality.tier,
+        heroHeight: ref.current?.parentElement?.offsetHeight ?? null,
+        viewportHeight: window.innerHeight,
+      },
+    };
+  }, [traveling, eligible, reduced, quality.tier]);
+
+  // Publish the wrapper so <LayerFade> can fade it from inside the render loop.
+  useEffect(() => {
+    orbLayer.el = ref.current;
+    return () => {
+      if (orbLayer.el) orbLayer.el.style.opacity = "";
+      orbLayer.el = null;
+    };
+  }, []);
 
   useEffect(() => {
     if (!traveling) return;
@@ -187,14 +218,12 @@ export function OrbScene() {
       aria-hidden
       className={
         traveling
-          ? "fixed inset-x-0 top-0 z-0 h-[100svh] transition-opacity duration-700"
+          ? "fixed inset-x-0 top-0 z-0 h-[100svh]"
           : "absolute inset-0 z-0"
       }
-      style={
-        traveling && !inView
-          ? { pointerEvents: "none", opacity: 0.38 }
-          : undefined
-      }
+      // Opacity is written per frame by <LayerFade>; only pointer-events is
+      // worth a React round trip, since it flips once per hero crossing.
+      style={traveling && !inView ? { pointerEvents: "none" } : undefined}
     >
       {webgl ? (
         <Experience

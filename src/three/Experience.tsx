@@ -14,8 +14,9 @@ import { OrbitalParticles } from "./scene/OrbitalParticles";
 import { OrbTravel } from "./scene/OrbTravel";
 import { PerfGovernor } from "./scene/PerfGovernor";
 import { LoadMoment } from "./scene/LoadMoment";
+import { LayerFade } from "./scene/LayerFade";
 import { LOAD_MOMENT } from "./config";
-import { getQuality, type Quality } from "./util/quality";
+import { getQuality, canTravel, type Quality } from "./util/quality";
 
 /**
  * The WebGL layer. Rendered on a transparent canvas so the page's dark
@@ -78,9 +79,11 @@ export function Experience({
         <OrbitalParticles reduced={reduced} count={quality.orbital} />
         <Orb reduced={reduced} detail={quality.orbDetail} traveling={traveling} />
       </OrbTravel>
-      <LoadMoment
-        enabled={LOAD_MOMENT && !reduced && quality.tier !== "low"}
-      />
+      <LayerFade enabled={traveling} />
+      {/* Gated on capability, not on the render tier: the intro is vertex-only
+          work, so a small window has no reason to lose it. canTravel() keeps it
+          off touch devices. */}
+      <LoadMoment enabled={LOAD_MOMENT && !reduced && canTravel()} />
       <Effects reduced={reduced} />
       <PerfGovernor
         maxDpr={quality.maxDpr}
