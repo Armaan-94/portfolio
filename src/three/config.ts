@@ -53,9 +53,9 @@ export const LAYER_MIN_OPACITY = 0.3;
  * The one-shot intro in which the starfield converges into the wordmark, holds,
  * and scatters back to its shell.
  *
- * Guarded on every side: skipped under reduced motion, on the low quality tier,
- * after the first view in a browser session, and the moment the reader does
- * anything deliberate (pointer, key, wheel, scroll). The DOM heading is never
- * gated on it, so the readable content arrives on its own schedule regardless.
+ * Guarded on every side: skipped under reduced motion, on touch devices, after
+ * the first view in a browser session, and the moment the reader does anything
+ * deliberate (pointer, key, wheel, scroll). The DOM heading is never gated on
+ * it, so the readable content arrives on its own schedule regardless.
  */
 export const LOAD_MOMENT = true;
