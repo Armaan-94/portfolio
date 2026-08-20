@@ -32,23 +32,30 @@ export const TRAVEL_EASE_START = 0.06;
 /** Past this much travel the orb is decorative: no hover, no cursor change. */
 export const TRAVEL_INERT_AT = 0.18;
 
-/** Destination offset as a fraction of the frustum half-extents at orb depth. */
+/**
+ * Destination offset as a fraction of the frustum half-extents at orb depth.
+ * Pushed well out so the orb clears the reading column rather than sitting
+ * behind it.
+ */
 export const TRAVEL_OFFSET = {
-  landscape: { x: 0.7, y: 0.2 },
-  portrait: { x: 0.24, y: 0.52 },
+  landscape: { x: 1.02, y: 0.3 },
+  portrait: { x: 0.3, y: 0.58 },
 } as const;
+
+/**
+ * How far the canvas layer fades as the orb travels. Reached early in the
+ * journey, because the orb passes behind the first body copy well before it
+ * reaches its final position.
+ */
+export const LAYER_MIN_OPACITY = 0.3;
 
 /**
  * The one-shot intro in which the starfield converges into the wordmark, holds,
  * and scatters back to its shell.
  *
- * OFF by default, deliberately. The implementation is complete (see
- * scene/LoadMoment.tsx, util/wordmark.ts and the uAssemble branch in the star
- * vertex shader) but it has not been watched running end to end, and an
- * unverified animation on first paint is the wrong thing to gamble on a
- * portfolio's first impression. Flip this to true, load the page in a fresh
- * session, and judge it; everything else about it is already guarded (skipped
- * under reduced motion, on the low tier, after the first view in a session, and
- * on any deliberate input).
+ * Guarded on every side: skipped under reduced motion, on the low quality tier,
+ * after the first view in a browser session, and the moment the reader does
+ * anything deliberate (pointer, key, wheel, scroll). The DOM heading is never
+ * gated on it, so the readable content arrives on its own schedule regardless.
  */
-export const LOAD_MOMENT = false;
+export const LOAD_MOMENT = true;

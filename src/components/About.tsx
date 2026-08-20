@@ -52,10 +52,11 @@ export function About() {
             ))}
           </div>
 
+          {/* Degree and school only. The CGPA lives in the stat card below and
+              stating it twice, two lines apart, just reads as repetition. */}
           <Reveal delay={0.1}>
             <p className="mt-6 font-mono text-sm text-muted">
-              {education.degree}, {education.school}. {education.period}. CGPA{" "}
-              {education.cgpa}.
+              {education.degree}, {education.school}. {education.period}.
             </p>
           </Reveal>
 
