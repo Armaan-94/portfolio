@@ -6,7 +6,7 @@ export function About() {
   return (
     <section
       id="about"
-      className="mx-auto w-full max-w-[var(--container-page)] scroll-mt-24 px-6 py-20 sm:px-8 sm:py-28"
+      className="relative z-10 mx-auto w-full max-w-[var(--container-page)] scroll-mt-24 px-6 py-20 sm:px-8 sm:py-28"
     >
       <Reveal>
         <div className="flex items-center gap-3">

@@ -60,10 +60,13 @@ export function Hero() {
       {/* the living orb, behind the content */}
       <OrbScene />
 
-      {/* legibility scrim: darkens the lower third where the identity sits */}
+      {/* legibility scrim: darkens the lower third where the identity sits.
+          Its bottom edge is the hero's bottom edge, so once the canvas persists
+          past the hero it draws a hard seam across the orb there. The
+          .hero-scrim rule fades it out on scroll, when its job is done. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-1/2"
+        className="hero-scrim pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-1/2"
         style={{
           background:
             "linear-gradient(to top, var(--color-base) 8%, color-mix(in srgb, var(--color-base) 55%, transparent) 45%, transparent 100%)",
@@ -138,8 +141,12 @@ export function Hero() {
         </motion.div>
       </div>
 
-      {/* bottom hairline */}
-      <div className="relative z-10 mx-auto w-full max-w-[var(--container-page)] px-6 sm:px-8">
+      {/* Bottom hairline. It marked the hero's edge back when the canvas ended
+          there too; with the orb persisting past it, the hairline and its
+          glowing node cut a visible line straight across the orb. Faded on
+          scroll by the same rule as the scrim, so the hero at rest is
+          unchanged. */}
+      <div className="hero-edge relative z-10 mx-auto w-full max-w-[var(--container-page)] px-6 sm:px-8">
         <div className="divider-node" />
       </div>
     </section>

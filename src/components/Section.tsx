@@ -22,7 +22,7 @@ export function Section({
   return (
     <section
       id={id}
-      className={`mx-auto w-full max-w-[var(--container-page)] scroll-mt-24 px-6 py-20 sm:px-8 sm:py-28 ${className}`}
+      className={`relative z-10 mx-auto w-full max-w-[var(--container-page)] scroll-mt-24 px-6 py-20 sm:px-8 sm:py-28 ${className}`}
     >
       <Reveal>
         <div className="flex items-center gap-3">
