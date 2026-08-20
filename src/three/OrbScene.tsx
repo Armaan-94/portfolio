@@ -175,6 +175,18 @@ export function OrbScene() {
     };
   }, [traveling, eligible, reduced, quality.tier]);
 
+  // Expose the decision to CSS. The hero's legibility scrim needs to know:
+  // it is sized to the hero's bottom half, so with a persistent canvas behind
+  // it, its lower edge draws a hard seam across the orb at the hero boundary.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (traveling) root.dataset.orbTraveling = "1";
+    else delete root.dataset.orbTraveling;
+    return () => {
+      delete root.dataset.orbTraveling;
+    };
+  }, [traveling]);
+
   // Publish the wrapper so <LayerFade> can fade it from inside the render loop.
   useEffect(() => {
     orbLayer.el = ref.current;
@@ -221,9 +233,10 @@ export function OrbScene() {
           ? "fixed inset-x-0 top-0 z-0 h-[100svh]"
           : "absolute inset-0 z-0"
       }
-      // Opacity is written per frame by <LayerFade>; only pointer-events is
-      // worth a React round trip, since it flips once per hero crossing.
-      style={traveling && !inView ? { pointerEvents: "none" } : undefined}
+      // Opacity and pointer-events are both written per frame by <LayerFade>,
+      // straight to the DOM. Driving them from React state fed by an
+      // IntersectionObserver was both too slow and, for pointer-events, wrong
+      // often enough to swallow clicks in the footer.
     >
       {webgl ? (
         <Experience

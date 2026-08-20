@@ -6,14 +6,19 @@ import { orbLayer, scrollState } from "../interaction";
 import { LAYER_MIN_OPACITY } from "../config";
 
 /**
- * Fades the whole canvas layer down as the orb travels, so body copy the orb
- * passes behind never loses contrast.
+ * Fades the canvas layer as the orb travels, and releases its pointer events
+ * once the hero is gone.
  *
- * Driven per frame from `scrollState.travel` rather than from a React state
- * flag: the flag version could only switch on the hero fully leaving the
- * viewport, which is far too late. By then the orb is already sitting over the
- * first paragraphs at full brightness. Writing one style property per frame
- * costs nothing and tracks the journey exactly.
+ * Both are driven per frame from the raw scroll position rather than from React
+ * state fed by an IntersectionObserver. The state version was both too late
+ * (it could only switch on the hero *fully* leaving the viewport, by which
+ * point the orb was already washing out the first paragraphs) and too
+ * unreliable for the pointer-events half, where a missed update means the
+ * fixed layer silently swallows clicks meant for the content underneath.
+ *
+ * The layer keeps pointer events while the hero is on screen, because that is
+ * what gives the orb its hover swell and cursor tracking. Past the hero it is
+ * purely decorative, so it stops taking input entirely.
  */
 export function LayerFade({ enabled = false }: { enabled?: boolean }) {
   useFrame(() => {
@@ -21,6 +26,7 @@ export function LayerFade({ enabled = false }: { enabled?: boolean }) {
     if (!el) return;
     if (!enabled) {
       if (el.style.opacity) el.style.opacity = "";
+      if (el.style.pointerEvents) el.style.pointerEvents = "";
       return;
     }
     // Raw, not damped: the fade must never trail a fast scroll.
@@ -30,6 +36,15 @@ export function LayerFade({ enabled = false }: { enabled?: boolean }) {
     // stable enough that the compositor is not invalidated every single frame.
     const next = target.toFixed(2);
     if (el.style.opacity !== next) el.style.opacity = next;
+
+    // Release input once the hero has essentially left. Content sections are
+    // positioned so they already out-paint this layer, but a decorative layer
+    // that still answers clicks is a bug waiting to happen.
+    const inert = scrollState.travelRaw > 0.9;
+    const pointerEvents = inert ? "none" : "";
+    if (el.style.pointerEvents !== pointerEvents) {
+      el.style.pointerEvents = pointerEvents;
+    }
   });
 
   return null;

@@ -40,6 +40,15 @@ to follow [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Footer links (GitHub, LinkedIn, LeetCode, Back to top) were unclickable. The
+  hero's `isolate` makes it a positioned stacking context, which paints above
+  non-positioned siblings, so the fixed canvas layer sat over the footer's
+  static links. Content sections and the footer are now positioned, so they
+  reliably out-paint the canvas, and the layer also releases pointer events past
+  the hero.
+- The hero's legibility scrim and bottom hairline both end exactly at the hero's
+  bottom edge, which drew a hard seam across the orb now that the canvas
+  persists past it. Both fade out over the first quarter viewport.
 - The traveling orb and the load moment were gated on the render quality tier,
   which drops to `low` on any viewport under 700px on its smaller side. Both
   silently did nothing in an ordinary windowed browser. They now gate on device

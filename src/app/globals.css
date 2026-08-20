@@ -281,6 +281,33 @@ body {
   }
 }
 
+/* Two things mark the hero's bottom edge: the legibility scrim (sized to the
+   hero's bottom half, so its lower edge lands exactly there) and the bottom
+   hairline with its glowing node. Both made sense when the canvas ended at the
+   hero too. With the orb persisting past it, both cut a visible line straight
+   across the orb, which is the seam this fades away.
+
+   They have done their job by the time anyone has scrolled, so they go over the
+   first quarter viewport. Scoped to [data-orb-traveling] (set by OrbScene) so
+   the non-traveling hero, where the canvas scrolls away with the section, is
+   completely untouched. */
+@keyframes scrim-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-orb-traveling] .hero-scrim,
+    [data-orb-traveling] .hero-edge {
+      animation: scrim-out linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 25vh;
+    }
+  }
+}
+
 @keyframes rule-draw {
   from {
     transform: scaleX(0);
