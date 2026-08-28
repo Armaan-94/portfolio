@@ -301,7 +301,7 @@ body {
   @media (prefers-reduced-motion: no-preference) {
     [data-orb-traveling] .hero-scrim,
     [data-orb-traveling] .hero-edge {
-      animation: scrim-out linear both;
+      animation: scrim-out ease-in-out both;
       animation-timeline: scroll(root block);
       animation-range: 0 25vh;
     }
