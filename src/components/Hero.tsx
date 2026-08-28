@@ -1,13 +1,63 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { motion, useMotionValue, useSpring, useReducedMotion } from "motion/react";
 import { profile } from "@/content";
 import { ArrowRightIcon, MailIcon, MapPinIcon } from "./Icons";
 import { OrbScene } from "@/three/OrbScene";
 import { MagneticButton } from "./MagneticButton";
 
+// Mirrors the `animation-range: 0 25vh` in the globals.css scrim-out rule.
+const SCRIM_FADE_VH = 0.25;
+
 export function Hero() {
   const reduce = useReducedMotion();
+  const scrimRef = useRef<HTMLDivElement>(null);
+  const edgeRef = useRef<HTMLDivElement>(null);
+
+  // Fallback for browsers without scroll-driven animations (e.g. Firefox,
+  // which does not implement `animation-timeline: scroll()`): without it the
+  // scrim and hairline never fade, and the seam they exist to hide reappears
+  // every time the orb travels past the hero on scroll. Inert whenever the
+  // native CSS animation already handles it, so this never double-drives
+  // opacity in browsers that support it.
+  useEffect(() => {
+    if (reduce) return;
+    if (
+      typeof CSS !== "undefined" &&
+      CSS.supports("animation-timeline", "scroll()")
+    ) {
+      return;
+    }
+
+    let raf = 0;
+    const apply = () => {
+      raf = 0;
+      const traveling = document.documentElement.dataset.orbTraveling === "1";
+      if (!traveling) {
+        if (scrimRef.current) scrimRef.current.style.opacity = "";
+        if (edgeRef.current) edgeRef.current.style.opacity = "";
+        return;
+      }
+      const progress = Math.min(
+        1,
+        Math.max(0, window.scrollY / (window.innerHeight * SCRIM_FADE_VH))
+      );
+      const opacity = String(1 - progress);
+      if (scrimRef.current) scrimRef.current.style.opacity = opacity;
+      if (edgeRef.current) edgeRef.current.style.opacity = opacity;
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(apply);
+    };
+
+    apply();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [reduce]);
 
   // Cursor parallax: the whole hero content block drifts a few pixels against
   // the pointer, so it floats in depth over the orb. Spring-damped; disabled
@@ -65,6 +115,7 @@ export function Hero() {
           past the hero it draws a hard seam across the orb there. The
           .hero-scrim rule fades it out on scroll, when its job is done. */}
       <div
+        ref={scrimRef}
         aria-hidden
         className="hero-scrim pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-1/2"
         style={{
@@ -146,7 +197,10 @@ export function Hero() {
           glowing node cut a visible line straight across the orb. Faded on
           scroll by the same rule as the scrim, so the hero at rest is
           unchanged. */}
-      <div className="hero-edge relative z-10 mx-auto w-full max-w-[var(--container-page)] px-6 sm:px-8">
+      <div
+        ref={edgeRef}
+        className="hero-edge relative z-10 mx-auto w-full max-w-[var(--container-page)] px-6 sm:px-8"
+      >
         <div className="divider-node" />
       </div>
     </section>
