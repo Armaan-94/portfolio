@@ -79,7 +79,7 @@ export function CodingActivity() {
                   <dt className="font-mono text-[11px] tracking-wide text-muted uppercase">
                     {n.label}
                   </dt>
-                  <dd className="mt-0.5 text-xl font-semibold text-ink">
+                  <dd className="mt-0.5 text-xl font-semibold tabular-nums text-ink">
                     {n.value}
                   </dd>
                 </div>

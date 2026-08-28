@@ -18,7 +18,7 @@ export const profile = {
   // About
   about: [
     "My center of gravity is distributed backend architecture and applied AI. On one side, Spring Cloud microservices: service discovery, gateways, centralized config. On the other, LLM agents, RAG, and MCP workflows. Cloud infrastructure holds it together.",
-    "I am a final-year Computer Science student, but the work has not felt like a student's. Across five internships I have shipped production ERP and CRM features, migrated enterprise metadata into Collibra, and built an AI business-intelligence layer over 160M plus customer records.",
+    "I am a final-year Computer Science student, but the work has not felt like a student’s. Across five internships I have shipped production ERP and CRM features, migrated enterprise metadata into Collibra, and built an AI business-intelligence layer over 160M plus customer records.",
     "I care about systems that run in production and move real numbers, not demos. I write clean, typed, well-structured code, and I like problems where backend depth and applied AI meet.",
   ],
   email: "armaanpunia94@gmail.com",
@@ -61,7 +61,7 @@ export const experience: Experience[] = [
     location: "Gurugram",
     period: "Apr 2026 - Aug 2026",
     bullets: [
-      "Built an AI-powered business-intelligence and large-scale data-processing layer over 160M+ customer records, increasing profitability by 18% across the company's financial services.",
+      "Built an AI-powered business-intelligence and large-scale data-processing layer over 160M+ customer records, increasing profitability by 18% across the company’s financial services.",
       "Designed and integrated scalable enterprise applications with Next.js, TypeScript, Python, DuckDB, and AI/ML workflows to automate data processing, analytics, and organization-wide insight sharing.",
       "Engineered CRM integrations consolidating multiple business services while streamlining digital marketing and operational workflows.",
       "Tested, optimized, and documented AI-powered Voice, SMS, Email, and WhatsApp communication modules, and wrote the technical training resources for AI automation agents.",

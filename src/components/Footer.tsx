@@ -19,7 +19,7 @@ export function Footer() {
             target="_blank"
             rel="noreferrer noopener"
             aria-label="GitHub"
-            className="grid h-9 w-9 place-items-center rounded-md text-muted transition-colors hover:bg-surface hover:text-ink"
+            className="grid h-11 w-11 place-items-center rounded-md text-muted transition-colors hover:bg-surface hover:text-ink sm:h-9 sm:w-9"
           >
             <GitHubIcon width={18} height={18} />
           </a>
@@ -28,7 +28,7 @@ export function Footer() {
             target="_blank"
             rel="noreferrer noopener"
             aria-label="LinkedIn"
-            className="grid h-9 w-9 place-items-center rounded-md text-muted transition-colors hover:bg-surface hover:text-ink"
+            className="grid h-11 w-11 place-items-center rounded-md text-muted transition-colors hover:bg-surface hover:text-ink sm:h-9 sm:w-9"
           >
             <LinkedInIcon width={18} height={18} />
           </a>
@@ -37,7 +37,7 @@ export function Footer() {
             target="_blank"
             rel="noreferrer noopener"
             aria-label="LeetCode"
-            className="grid h-9 w-9 place-items-center rounded-md text-muted transition-colors hover:bg-surface hover:text-ink"
+            className="grid h-11 w-11 place-items-center rounded-md text-muted transition-colors hover:bg-surface hover:text-ink sm:h-9 sm:w-9"
           >
             <LeetCodeIcon width={18} height={18} />
           </a>

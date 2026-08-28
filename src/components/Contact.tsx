@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { profile } from "@/content";
 import { Reveal } from "./Reveal";
 import {
@@ -9,6 +9,7 @@ import {
   LinkedInIcon,
   LeetCodeIcon,
   ArrowRightIcon,
+  SpinnerIcon,
 } from "./Icons";
 
 type Status = "idle" | "sending" | "success" | "error";
@@ -20,6 +21,7 @@ export function Contact() {
   const [company, setCompany] = useState(""); // honeypot — must stay empty
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const errorRef = useRef<HTMLParagraphElement>(null);
 
   // Real submission: POST to the /api/contact route, which sends the email
   // server-side via Resend. Reflect actual sending / success / error state.
@@ -43,6 +45,17 @@ export function Contact() {
     } catch (err) {
       setStatus("error");
       setErrorMsg(err instanceof Error ? err.message : "Something went wrong.");
+      // Move focus to the error so keyboard/screen-reader users land on it
+      // immediately rather than having to hunt for what happened.
+      requestAnimationFrame(() => errorRef.current?.focus());
+    }
+  }
+
+  // ⌘/⌃+Enter submits from the textarea; a plain Enter still inserts a
+  // newline, which is the native (and expected) textarea behavior.
+  function onMessageKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      e.currentTarget.form?.requestSubmit();
     }
   }
 
@@ -124,7 +137,7 @@ export function Contact() {
                 </div>
                 <h3 className="mt-4 text-lg font-semibold text-ink">Message sent</h3>
                 <p className="mt-2 max-w-sm text-sm text-muted">
-                  Thanks for reaching out — it landed in my inbox and I&apos;ll get
+                  Thanks for reaching out — it landed in my inbox and I&rsquo;ll get
                   back to you soon.
                 </p>
                 <button
@@ -157,6 +170,7 @@ export function Contact() {
                     value={from}
                     onChange={setFrom}
                     autoComplete="email"
+                    spellCheck={false}
                     required
                   />
                 </div>
@@ -173,8 +187,9 @@ export function Contact() {
                     rows={5}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    className="mt-2 w-full resize-y rounded-lg border border-hairline bg-base/60 px-3.5 py-2.5 text-sm text-ink placeholder:text-faint focus:border-indigo focus:outline-none"
-                    placeholder="What are you building?"
+                    onKeyDown={onMessageKeyDown}
+                    className="mt-2 w-full resize-y rounded-lg border border-hairline bg-base/60 px-3.5 py-2.5 text-base text-ink placeholder:text-faint focus:border-indigo focus:outline-none sm:text-sm"
+                    placeholder="Tell me what you’re building…"
                   />
                 </div>
 
@@ -197,7 +212,10 @@ export function Contact() {
                   disabled={status === "sending"}
                   className="group mt-6 inline-flex items-center gap-2 rounded-lg bg-indigo px-5 py-3 text-sm font-semibold text-base transition-transform hover:-translate-y-0.5 hover:bg-violet disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                 >
-                  {status === "sending" ? "Sending…" : "Send message"}
+                  {status === "sending" ? (
+                    <SpinnerIcon width={16} height={16} />
+                  ) : null}
+                  Send message
                   {status !== "sending" ? (
                     <ArrowRightIcon
                       width={18}
@@ -208,12 +226,17 @@ export function Contact() {
                 </button>
 
                 {status === "error" ? (
-                  <p role="alert" className="mt-3 text-[13px] text-[#fca5a5]">
+                  <p
+                    ref={errorRef}
+                    tabIndex={-1}
+                    aria-live="polite"
+                    className="mt-3 text-[13px] text-[#fca5a5] focus:outline-none"
+                  >
                     {errorMsg}
                   </p>
                 ) : (
                   <p className="mt-3 font-mono text-[11px] text-faint">
-                    Sends straight to my inbox. Your details aren&apos;t stored.
+                    Sends straight to my inbox. Your details aren&rsquo;t stored.
                   </p>
                 )}
               </form>
@@ -233,6 +256,7 @@ function Field({
   type = "text",
   required,
   autoComplete,
+  spellCheck,
 }: {
   id: string;
   label: string;
@@ -241,6 +265,7 @@ function Field({
   type?: string;
   required?: boolean;
   autoComplete?: string;
+  spellCheck?: boolean;
 }) {
   return (
     <div>
@@ -253,11 +278,13 @@ function Field({
       <input
         id={id}
         type={type}
+        inputMode={type === "email" ? "email" : undefined}
         required={required}
         autoComplete={autoComplete}
+        spellCheck={spellCheck}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-2 w-full rounded-lg border border-hairline bg-base/60 px-3.5 py-2.5 text-sm text-ink placeholder:text-faint focus:border-indigo focus:outline-none"
+        className="mt-2 w-full rounded-lg border border-hairline bg-base/60 px-3.5 py-2.5 text-base text-ink placeholder:text-faint focus:border-indigo focus:outline-none sm:text-sm"
       />
     </div>
   );
