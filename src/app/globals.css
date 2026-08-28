@@ -287,10 +287,13 @@ body {
    hero too. With the orb persisting past it, both cut a visible line straight
    across the orb, which is the seam this fades away.
 
-   They have done their job by the time anyone has scrolled, so they go over the
-   first quarter viewport. Scoped to [data-orb-traveling] (set by OrbScene) so
-   the non-traveling hero, where the canvas scrolls away with the section, is
-   completely untouched. */
+   They have done their job the moment scrolling starts, so they fade over a
+   tiny 3vh window rather than a lingering one - any partial, still-visible
+   state reads as a glitch (a half-faded hairline/dot looks cut off, not
+   mid-transition), so the goal is "present at rest, gone almost the instant
+   you scroll" in both directions, not a slow dissolve. Scoped to
+   [data-orb-traveling] (set by OrbScene) so the non-traveling hero, where the
+   canvas scrolls away with the section, is completely untouched. */
 @keyframes scrim-out {
   to {
     opacity: 0;
@@ -303,7 +306,7 @@ body {
     [data-orb-traveling] .hero-edge {
       animation: scrim-out var(--ease-house) both;
       animation-timeline: scroll(root block);
-      animation-range: 0 25vh;
+      animation-range: 0 3vh;
     }
   }
 }
