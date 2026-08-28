@@ -112,6 +112,18 @@ export function CloseIcon(props: IconProps) {
   );
 }
 
+export function SpinnerIcon(props: IconProps) {
+  return (
+    <svg
+      {...base}
+      {...props}
+      className={`animate-spin motion-reduce:animate-none ${props.className ?? ""}`}
+    >
+      <path d="M12 3a9 9 0 1 0 9 9" />
+    </svg>
+  );
+}
+
 export function MapPinIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>

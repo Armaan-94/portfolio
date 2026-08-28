@@ -118,7 +118,7 @@ export function Nav() {
             target="_blank"
             rel="noreferrer noopener"
             aria-label="GitHub"
-            className="grid h-9 w-9 place-items-center rounded-md text-muted transition-colors hover:bg-surface hover:text-ink"
+            className="grid h-11 w-11 place-items-center rounded-md text-muted transition-colors hover:bg-surface hover:text-ink sm:h-9 sm:w-9"
           >
             <GitHubIcon width={18} height={18} />
           </a>
@@ -127,7 +127,7 @@ export function Nav() {
             target="_blank"
             rel="noreferrer noopener"
             aria-label="LinkedIn"
-            className="grid h-9 w-9 place-items-center rounded-md text-muted transition-colors hover:bg-surface hover:text-ink"
+            className="grid h-11 w-11 place-items-center rounded-md text-muted transition-colors hover:bg-surface hover:text-ink sm:h-9 sm:w-9"
           >
             <LinkedInIcon width={18} height={18} />
           </a>
@@ -136,7 +136,7 @@ export function Nav() {
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
-            className="grid h-9 w-9 place-items-center rounded-md text-ink transition-colors hover:bg-surface md:hidden"
+            className="grid h-11 w-11 place-items-center rounded-md text-ink transition-colors hover:bg-surface sm:h-9 sm:w-9 md:hidden"
           >
             {open ? <MenuIconSwap open /> : <MenuIconSwap />}
           </button>

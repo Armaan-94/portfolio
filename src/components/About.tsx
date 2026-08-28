@@ -25,6 +25,7 @@ export function About() {
               src="/armaan.jpg"
               alt={`${profile.name} receiving an award on stage`}
               fill
+              priority
               sizes="(max-width: 1024px) 20rem, 20rem"
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
               style={{ objectPosition: "64% 20%" }}
@@ -68,7 +69,7 @@ export function About() {
                   <dt className="font-mono text-[11px] tracking-wide text-muted uppercase">
                     {s.label}
                   </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-ink">
+                  <dd className="mt-1 text-2xl font-semibold tabular-nums text-ink">
                     {s.value}
                   </dd>
                 </div>
