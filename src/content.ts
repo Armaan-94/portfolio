@@ -134,6 +134,15 @@ export const projects: Project[] = [
     code: "https://github.com/Armaan-94/Food-Delivery-System",
   },
   {
+    title: "AI Answer Sheet Grader",
+    category: "AI/ML",
+    description:
+      "An AI grading tool that reads scanned exam sheets with a vision LLM: extracts every question and handwritten answer, matches them by label even when out of order or split across pages, highlights the exact answer region, and generates a score with AI feedback.",
+    stack: ["Next.js", "Gemini API", "pdf.js", "Tailwind CSS"],
+    code: "https://github.com/Armaan-94/ai_assessment_extraction_application",
+    live: "https://ai-assessment-extraction-applicatio.vercel.app",
+  },
+  {
     title: "Fake News Detector",
     category: "AI/ML",
     description:
