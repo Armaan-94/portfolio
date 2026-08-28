@@ -311,6 +311,13 @@ body {
   }
 }
 
+/* The hero's own hairline drops its glowing node entirely - the dot is what
+   read as "cut" during the seam fade. The unrelated .divider-node between
+   About and Experience keeps its dot; only the hero's copy loses it. */
+.hero-edge .divider-node::after {
+  display: none;
+}
+
 @keyframes rule-draw {
   from {
     transform: scaleX(0);
