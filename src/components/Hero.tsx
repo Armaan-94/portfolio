@@ -10,6 +10,13 @@ import { MagneticButton } from "./MagneticButton";
 // Mirrors the `animation-range: 0 25vh` in the globals.css scrim-out rule.
 const SCRIM_FADE_VH = 0.25;
 
+// Smoothstep, matching the ease-in-out feel of the CSS path (which itself
+// exists so the fade reads as a transition rather than a hard cutoff).
+function smoothstep(x: number) {
+  const t = Math.min(1, Math.max(0, x));
+  return t * t * (3 - 2 * t);
+}
+
 export function Hero() {
   const reduce = useReducedMotion();
   const scrimRef = useRef<HTMLDivElement>(null);
@@ -39,11 +46,11 @@ export function Hero() {
         if (edgeRef.current) edgeRef.current.style.opacity = "";
         return;
       }
-      const progress = Math.min(
+      const raw = Math.min(
         1,
         Math.max(0, window.scrollY / (window.innerHeight * SCRIM_FADE_VH))
       );
-      const opacity = String(1 - progress);
+      const opacity = String(1 - smoothstep(raw));
       if (scrimRef.current) scrimRef.current.style.opacity = opacity;
       if (edgeRef.current) edgeRef.current.style.opacity = opacity;
     };
