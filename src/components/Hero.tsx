@@ -7,8 +7,8 @@ import { ArrowRightIcon, MailIcon, MapPinIcon } from "./Icons";
 import { OrbScene } from "@/three/OrbScene";
 import { MagneticButton } from "./MagneticButton";
 
-// Mirrors the `animation-range: 0 25vh` in the globals.css scrim-out rule.
-const SCRIM_FADE_VH = 0.25;
+// Mirrors the `animation-range: 0 3vh` in the globals.css scrim-out rule.
+const SCRIM_FADE_VH = 0.03;
 
 // Numeric cubic-bezier evaluator (Newton-Raphson on the bezier's own X, same
 // technique the CSS engine uses), so the JS fallback path eases identically
