@@ -9,7 +9,6 @@ export const profile = {
   title: "Software Engineer",
   eyebrow: "SOFTWARE ENGINEER",
   location: "Gurugram, India",
-  graduating: "2026",
   // Hero (rendered as: headline + gradient accent)
   headline: "I build backend systems and AI products that ship to production,",
   headlineAccent: "and move real numbers",
@@ -18,7 +17,7 @@ export const profile = {
   // About
   about: [
     "My center of gravity is distributed backend architecture and applied AI. On one side, Spring Cloud microservices: service discovery, gateways, centralized config. On the other, LLM agents, RAG, and MCP workflows. Cloud infrastructure holds it together.",
-    "I am a final-year Computer Science student, but the work has not felt like a student’s. Across five internships I have shipped production ERP and CRM features, migrated enterprise metadata into Collibra, and built an AI business-intelligence layer over 160M plus customer records.",
+    "I am a Computer Science graduate, and the work already reads as production experience, not coursework. Across five internships I have shipped production ERP and CRM features, migrated enterprise metadata into Collibra, and built an AI business-intelligence layer over 160M plus customer records.",
     "I care about systems that run in production and move real numbers, not demos. I write clean, typed, well-structured code, and I like problems where backend depth and applied AI meet.",
   ],
   email: "armaanpunia94@gmail.com",
