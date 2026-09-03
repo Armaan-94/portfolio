@@ -10,7 +10,6 @@ export function Experience() {
       id="experience"
       eyebrow="02 / Experience"
       title="Five internships, real production impact."
-      intro="Reverse chronological. Company first, because that is what gets scanned."
     >
       <ol className="relative">
         {/* vertical rail */}
