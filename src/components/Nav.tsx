@@ -50,7 +50,7 @@ export function Nav() {
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
         scrolled
-          ? "border-b border-hairline bg-base/80 backdrop-blur-md"
+          ? "border-b border-hairline bg-canvas/80 backdrop-blur-md"
           : "border-b border-transparent"
       }`}
     >
@@ -151,7 +151,7 @@ export function Nav() {
             animate={{ opacity: 1, y: 0 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="border-b border-hairline bg-base/95 backdrop-blur-md md:hidden"
+            className="border-b border-hairline bg-canvas/95 backdrop-blur-md md:hidden"
           >
             <ul className="mx-auto flex max-w-[var(--container-page)] flex-col px-6 py-4">
               {nav.map((item) => (

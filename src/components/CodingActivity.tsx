@@ -50,7 +50,7 @@ export function CodingActivity() {
             {/* header row */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
-                <span className="grid h-10 w-10 place-items-center rounded-lg border border-hairline bg-base text-cyan">
+                <span className="grid h-10 w-10 place-items-center rounded-lg border border-hairline bg-canvas text-cyan">
                   <LeetCodeIcon width={20} height={20} />
                 </span>
                 <div>
@@ -74,7 +74,7 @@ export function CodingActivity() {
               {numbers.map((n) => (
                 <div
                   key={n.label}
-                  className="rounded-lg border border-hairline bg-base/40 px-4 py-3"
+                  className="rounded-lg border border-hairline bg-canvas/40 px-4 py-3"
                 >
                   <dt className="font-mono text-[11px] tracking-wide text-muted uppercase">
                     {n.label}
