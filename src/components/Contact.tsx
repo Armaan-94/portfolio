@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { profile } from "@/content";
+import { useContactForm } from "@/lib/useContactForm";
 import { Reveal } from "./Reveal";
 import {
   MailIcon,
@@ -12,52 +12,25 @@ import {
   SpinnerIcon,
 } from "./Icons";
 
-type Status = "idle" | "sending" | "success" | "error";
-
 export function Contact() {
-  const [name, setName] = useState("");
-  const [from, setFrom] = useState("");
-  const [message, setMessage] = useState("");
-  const [company, setCompany] = useState(""); // honeypot — must stay empty
-  const [status, setStatus] = useState<Status>("idle");
-  const [errorMsg, setErrorMsg] = useState("");
-  const errorRef = useRef<HTMLParagraphElement>(null);
-
-  // Real submission: POST to the /api/contact route, which sends the email
-  // server-side via Resend. Reflect actual sending / success / error state.
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    if (status === "sending") return;
-    setStatus("sending");
-    setErrorMsg("");
-    try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email: from, message, company }),
-      });
-      const data: { error?: string } = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Something went wrong.");
-      setStatus("success");
-      setName("");
-      setFrom("");
-      setMessage("");
-    } catch (err) {
-      setStatus("error");
-      setErrorMsg(err instanceof Error ? err.message : "Something went wrong.");
-      // Move focus to the error so keyboard/screen-reader users land on it
-      // immediately rather than having to hunt for what happened.
-      requestAnimationFrame(() => errorRef.current?.focus());
-    }
-  }
-
-  // ⌘/⌃+Enter submits from the textarea; a plain Enter still inserts a
-  // newline, which is the native (and expected) textarea behavior.
-  function onMessageKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-      e.currentTarget.form?.requestSubmit();
-    }
-  }
+  // Behaviour is shared across every theme; only this markup is the default
+  // theme's. See src/lib/useContactForm.ts.
+  const {
+    name,
+    setName,
+    email,
+    setEmail,
+    message,
+    setMessage,
+    company,
+    setCompany,
+    status,
+    errorMsg,
+    errorRef,
+    onSubmit,
+    onMessageKeyDown,
+    reset,
+  } = useContactForm();
 
   return (
     <section
@@ -142,7 +115,7 @@ export function Contact() {
                 </p>
                 <button
                   type="button"
-                  onClick={() => setStatus("idle")}
+                  onClick={reset}
                   className="mt-5 text-sm font-medium text-indigo transition-colors hover:text-cyan"
                 >
                   Send another
@@ -167,8 +140,8 @@ export function Contact() {
                     id="email"
                     label="Email"
                     type="email"
-                    value={from}
-                    onChange={setFrom}
+                    value={email}
+                    onChange={setEmail}
                     autoComplete="email"
                     spellCheck={false}
                     required

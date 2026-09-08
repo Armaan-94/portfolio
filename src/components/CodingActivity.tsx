@@ -1,14 +1,12 @@
 import type { CSSProperties } from "react";
 
 import { leetcode } from "@/content";
-import { getLeetCodeData } from "@/lib/leetcode";
+import { getLeetCodeData, WEEKS, DAYS } from "@/lib/leetcode";
 import { Section } from "./Section";
 import { Reveal } from "./Reveal";
 import { Cascade } from "./Cascade";
 import { LeetCodeIcon, ExternalIcon } from "./Icons";
 
-const WEEKS = 53;
-const DAYS = 7;
 const HEAT_COLORS = [
   "var(--color-hm-0)",
   "var(--color-hm-1)",

@@ -17,8 +17,10 @@ import snapshot from "@/data/leetcode.json";
  * figures in `content.ts`, so the section can never break.
  */
 
-const WEEKS = 53;
-const DAYS = 7;
+// Exported because the grid shape is the renderer's business too, and two
+// copies of "53" drift. CodingActivity used to declare its own pair.
+export const WEEKS = 53;
+export const DAYS = 7;
 const TOTAL = WEEKS * DAYS;
 
 export type LeetCodeData = {
@@ -31,6 +33,12 @@ export type LeetCodeData = {
   submissionsPastYear: number;
   /** WEEKS*DAYS heat levels (0..4), column-major, row 0 = Sunday. */
   cells: number[];
+  /**
+   * The raw per-day submission counts behind `cells`, same order and length.
+   * Buckets are lossy, and a waveform needs the real amplitude rather than a
+   * five-step level.
+   */
+  counts: number[];
   source: "live" | "fallback";
 };
 
@@ -72,20 +80,27 @@ function gridFromCalendar(calendar: Record<string, number>) {
   yearAgo.setUTCDate(today.getUTCDate() - 365);
 
   const cells = new Array<number>(TOTAL).fill(0);
+  const counts = new Array<number>(TOTAL).fill(0);
   let submissionsPastYear = 0;
   const cursor = new Date(start);
   for (let i = 0; i < TOTAL; i++) {
     const key = cursor.toISOString().slice(0, 10);
     const count = byDay.get(key) ?? 0;
+    counts[i] = count;
     cells[i] = levelFor(count);
     if (cursor >= yearAgo && cursor <= today) submissionsPastYear += count;
     cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
-  return { cells, submissionsPastYear };
+  return { cells, counts, submissionsPastYear };
 }
 
+// One representative count per heat level, chosen so levelFor() round-trips to
+// the level it came from. Keeps the illustrative cells identical to before
+// while giving the waveform something plausible to draw.
+const COUNT_FOR_LEVEL = [0, 2, 4, 8, 11] as const;
+
 // Deterministic illustrative grid — only used when the snapshot is unusable.
-function fallbackGrid(): number[] {
+function fallbackGrid(): { cells: number[]; counts: number[] } {
   let seed = 20260724;
   const rand = () => {
     seed = (seed + 0x6d2b79f5) | 0;
@@ -94,6 +109,7 @@ function fallbackGrid(): number[] {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
   const cells: number[] = [];
+  const counts: number[] = [];
   for (let i = 0; i < TOTAL; i++) {
     const r = rand();
     let level = 0;
@@ -104,11 +120,13 @@ function fallbackGrid(): number[] {
       else level = 1;
     }
     cells.push(level);
+    counts.push(COUNT_FOR_LEVEL[level]);
   }
-  return cells;
+  return { cells, counts };
 }
 
 function fallback(): LeetCodeData {
+  const { cells, counts } = fallbackGrid();
   return {
     solved: leetcode.solved,
     easy: leetcode.easy,
@@ -117,7 +135,8 @@ function fallback(): LeetCodeData {
     activeDays: leetcode.activeDays,
     streak: 0,
     submissionsPastYear: leetcode.submissionsPastYear,
-    cells: fallbackGrid(),
+    cells,
+    counts,
     source: "fallback",
   };
 }
@@ -128,7 +147,7 @@ export function getLeetCodeData(): LeetCodeData {
     return fallback();
   }
 
-  const { cells, submissionsPastYear } = gridFromCalendar(snap.calendar);
+  const { cells, counts, submissionsPastYear } = gridFromCalendar(snap.calendar);
   return {
     solved: snap.solved,
     easy: snap.easy,
@@ -138,6 +157,7 @@ export function getLeetCodeData(): LeetCodeData {
     streak: snap.streak,
     submissionsPastYear,
     cells,
+    counts,
     source: "live",
   };
 }
