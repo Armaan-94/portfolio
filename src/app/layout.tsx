@@ -71,6 +71,16 @@ export default function RootLayout({
       className={`${sora.variable} ${jetbrainsMono.variable} antialiased`}
     >
       <body>
+        {/* Runs before the body paints. The previous page set this flag on its
+            way out, so an arriving theme fades up instead of snapping in. The
+            reduced-motion rule in globals.css collapses the fade to nothing
+            for free, since it clamps every animation duration. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              'try{if(sessionStorage.getItem("theme:entering")){sessionStorage.removeItem("theme:entering");document.documentElement.dataset.themeEntering="1"}}catch(e){}',
+          }}
+        />
         <a
           href="#content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:bg-indigo focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-canvas"

@@ -434,6 +434,38 @@ button {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/*  Theme switching                                                    */
+/* ------------------------------------------------------------------ */
+
+/* Switching themes is a full document load, so the outgoing page is covered
+   before it navigates and the incoming one fades up. Both use opacity only.
+   Opacity creates a stacking context but NOT a containing block, so neither
+   can capture the default theme's fixed orb layer the way a transform or a
+   filter would. */
+@keyframes theme-veil {
+  to {
+    opacity: 1;
+  }
+}
+
+.theme-veil {
+  opacity: 0;
+  animation: theme-veil 220ms ease-out forwards;
+}
+
+@keyframes theme-enter {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Set by a pre-paint script in the root layout when the previous page handed
+   over. Absent on a normal visit, so a cold load never pays for it. */
+[data-theme-entering] body {
+  animation: theme-enter 320ms var(--ease-house) both;
+}
+
 /* Reduced motion: kill non-essential animation */
 @media (prefers-reduced-motion: reduce) {
   html {
