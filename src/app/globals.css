@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Per-theme token overrides. Imported here because @import must precede other
+   rules; position does not affect the cascade, since a theme block scopes its
+   values to the ThemeShell div while :root scopes them to <html>, and a value
+   set on an element always shadows the one it would inherit. */
+@import "./themes.css";
+
 /* ------------------------------------------------------------------ */
 /*  Design tokens (established personal brand)                         */
 /* ------------------------------------------------------------------ */
