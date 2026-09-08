@@ -38,6 +38,15 @@ export const THEMES: readonly ThemeMeta[] = [
     scheme: "dark",
     themeColor: "#0d1117",
   },
+  {
+    id: "retro",
+    label: "Retro",
+    tagline: "American screen print, cream on charcoal",
+    href: "/retro",
+    swatch: ["#1a1a1a", "#dcc9a9", "#b83a2d"],
+    scheme: "dark",
+    themeColor: "#1a1a1a",
+  },
 ] as const;
 
 export const DEFAULT_THEME: ThemeId = "default";

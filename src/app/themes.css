@@ -1,0 +1,170 @@
+/* ------------------------------------------------------------------ */
+/*  Theme token overrides                                              */
+/* ------------------------------------------------------------------ */
+
+/* These blocks are deliberately UNLAYERED. Tailwind emits its @theme tokens
+   inside `@layer theme`, and unlayered declarations beat every layer no matter
+   the specificity, so a plain [data-theme] selector here overrides :root
+   without the @theme block in globals.css having to change at all. That is
+   what keeps the default theme's compiled CSS byte-for-byte what it was.
+
+   Each theme redefines the SEMANTIC tokens (--color-ink, --color-canvas, and
+   so on) so every existing utility follows it, then adds its own private
+   --rt- and --wy- values for things with no Tailwind
+   namespace. */
+
+/* ================================================================== */
+/*  retro - American screen-print poster                               */
+/* ================================================================== */
+[data-theme="retro"] {
+  /* Palette. The three source colours are cream, brick and sage on charcoal.
+     Measured against the #1a1a1a ground:
+       cream #DCC9A9  10.75:1  body text
+       brick #B83A2D   3.05:1  FILLS AND RULES ONLY, never body text
+       sage  #4E6851   2.84:1  FILLS ONLY, fails even the large-text 3:1 bar
+     So brick and sage each get a lightened sibling for the cases where they
+     genuinely have to carry text. Using the poster colours as ink directly is
+     the single easiest way to fail this theme. */
+  --rt-char: #1a1a1a;
+  --rt-cream: #dcc9a9;
+  --rt-cream-2: #b8a88c;
+  --rt-paper: #e8dcc4;
+  --rt-brick: #b83a2d;
+  --rt-brick-txt: #dd6449; /* 4.97:1 on char */
+  --rt-sage: #4e6851;
+  --rt-sage-txt: #7a9a7e; /* 5.60:1 on char */
+  /* Cream measures only 3.52:1 on brick, which clears the 3:1 large-text bar
+     and fails the 4.5:1 body bar. Large display type on a brick panel keeps
+     the true cream; anything smaller uses this paler one, at 4.98:1. */
+  --rt-cream-hi: #f5efe3;
+  --rt-dropcap: var(--rt-brick-txt);
+
+  /* Semantic tokens, so shared utilities follow the theme */
+  --color-canvas: var(--rt-char);
+  --color-surface: #232323;
+  --color-surface-2: #1f1f1f;
+  --color-hairline: #4a4238;
+  --color-ink: var(--rt-cream);
+  --color-body: var(--rt-cream);
+  --color-muted: var(--rt-cream-2);
+  --color-faint: #8a7f6a;
+  --color-indigo: var(--rt-brick-txt);
+  --color-violet: var(--rt-brick);
+  --color-deep-indigo: var(--rt-brick);
+  --color-cyan: var(--rt-sage-txt);
+  --color-danger: var(--rt-brick-txt);
+
+  /* Print has no drop shadows and no soft backdrops. */
+  --shadow-card-hover: none;
+  --grid-image: none;
+  --grid-size: 0 0;
+  --gradient-wordmark: none;
+
+  --container-page: 1280px;
+  --scroll-pad: 5rem;
+
+  --font-sans: var(--font-bitter), Georgia, serif;
+  --font-mono: var(--font-bitter), Georgia, serif;
+  --font-display: var(--font-anton), Impact, sans-serif;
+
+  /* Film grain, as an inline feTurbulence rather than a PNG. ~180 bytes and no
+     network request. Applied to ONE fixed full-viewport pseudo-element, never
+     per section: one rasterisation, and being fixed it never repaints on
+     scroll. Never combine this with backdrop-filter. */
+  --rt-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* A filter attribute cannot be changed from CSS, and 0.82 moires on retina, so
+   the high-DPI grain is a second data URI rather than a tweak. Worth 200 bytes. */
+@media (min-resolution: 2dppx) {
+  [data-theme="retro"] {
+    --rt-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+[data-theme="retro"] .rt-grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background-image: var(--rt-grain);
+  opacity: 0.055;
+  mix-blend-mode: overlay;
+}
+
+/* Halftone dot field. Rotated 15deg on an oversized child, because
+   axis-aligned dots read as "CSS" and rotated dots read as "screen print". */
+[data-theme="retro"] .rt-halftone {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+[data-theme="retro"] .rt-halftone::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background-image: radial-gradient(currentColor 0.9px, transparent 1px);
+  background-size: 4px 4px;
+  opacity: 0.14;
+  transform: rotate(15deg);
+  pointer-events: none;
+}
+
+/* Drop cap. ::first-letter rather than a wrapper span, which breaks reading
+   order in some assistive tech. Sized from (lines x body line-height) over
+   Bitter's ~0.72em cap height; browsers disagree on the box maths by a pixel
+   or two, so this is tuned against the rendered baseline. */
+[data-theme="retro"] .rt-lede::first-letter {
+  float: left;
+  font-family: var(--font-display);
+  font-size: 3.6em;
+  line-height: 0.82;
+  padding: 0.02em 0.1em 0 0;
+  color: var(--rt-dropcap);
+}
+
+/* Poster rules: the masthead name flushes both edges by tracking each line
+   individually, never by text-align: justify. */
+[data-theme="retro"] .rt-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 0.84;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+}
+
+[data-theme="retro"] .rt-caption {
+  font-size: 0.75rem;
+  line-height: 1.35;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Inside a brick panel the drop cap would be brick on brick, i.e. invisible,
+   and body copy would sit at 3.52:1. Both are re-inked here rather than at
+   every call site, so the rule cannot be forgotten at one of them. */
+[data-theme="retro"] .rt-on-brick {
+  --rt-dropcap: var(--rt-cream-hi);
+  color: var(--rt-cream-hi);
+}
+
+/* Mis-registration on the masthead only, the way a two-pass screen print
+   never quite lines up. */
+[data-theme="retro"] .rt-misprint {
+  text-shadow: 1.5px 1.5px 0 color-mix(in srgb, var(--rt-brick) 22%, transparent);
+}
+
+/* Underline that draws in on hover, as one background-size transition. */
+[data-theme="retro"] .rt-rule-link {
+  background-image: linear-gradient(var(--rt-brick), var(--rt-brick));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 3px;
+  transition: background-size 0.35s var(--ease-house);
+}
+[data-theme="retro"] .rt-rule-link:hover,
+[data-theme="retro"] .rt-rule-link:focus-visible {
+  background-size: 100% 3px;
+}
