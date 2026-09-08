@@ -196,7 +196,7 @@ export function Hero() {
           >
             <MagneticButton
               href="#projects"
-              className="btn-magnetic sheen group inline-flex items-center justify-center gap-2 rounded-lg bg-indigo px-5 py-3 text-sm font-semibold text-base transition-colors hover:bg-violet"
+              className="btn-magnetic sheen group inline-flex items-center justify-center gap-2 rounded-lg bg-indigo px-5 py-3 text-sm font-semibold text-canvas transition-colors hover:bg-violet"
             >
               <span className="relative z-[1] inline-flex items-center gap-2">
                 View work

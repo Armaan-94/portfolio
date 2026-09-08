@@ -188,7 +188,7 @@ export function Contact() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={onMessageKeyDown}
-                    className="mt-2 w-full resize-y rounded-lg border border-hairline bg-base/60 px-3.5 py-2.5 text-base text-ink placeholder:text-faint focus:border-indigo focus:outline-none sm:text-sm"
+                    className="mt-2 w-full resize-y rounded-lg border border-hairline bg-canvas/60 px-3.5 py-2.5 text-base text-ink placeholder:text-faint focus:border-indigo focus:outline-none sm:text-sm"
                     placeholder="Tell me what you’re building…"
                   />
                 </div>
@@ -210,7 +210,7 @@ export function Contact() {
                 <button
                   type="submit"
                   disabled={status === "sending"}
-                  className="group mt-6 inline-flex items-center gap-2 rounded-lg bg-indigo px-5 py-3 text-sm font-semibold text-base transition-transform hover:-translate-y-0.5 hover:bg-violet disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                  className="group mt-6 inline-flex items-center gap-2 rounded-lg bg-indigo px-5 py-3 text-sm font-semibold text-canvas transition-transform hover:-translate-y-0.5 hover:bg-violet disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                 >
                   {status === "sending" ? (
                     <SpinnerIcon width={16} height={16} />
@@ -230,7 +230,7 @@ export function Contact() {
                     ref={errorRef}
                     tabIndex={-1}
                     aria-live="polite"
-                    className="mt-3 text-[13px] text-[#fca5a5] focus:outline-none"
+                    className="mt-3 text-[13px] text-danger focus:outline-none"
                   >
                     {errorMsg}
                   </p>
@@ -284,7 +284,7 @@ function Field({
         spellCheck={spellCheck}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-2 w-full rounded-lg border border-hairline bg-base/60 px-3.5 py-2.5 text-base text-ink placeholder:text-faint focus:border-indigo focus:outline-none sm:text-sm"
+        className="mt-2 w-full rounded-lg border border-hairline bg-canvas/60 px-3.5 py-2.5 text-base text-ink placeholder:text-faint focus:border-indigo focus:outline-none sm:text-sm"
       />
     </div>
   );
