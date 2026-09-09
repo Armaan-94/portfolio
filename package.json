@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "ascii": "node scripts/ascii-prebake.mjs"
+    "ascii": "node scripts/ascii-prebake.mjs",
+    "gen:image": "node scripts/gen-image.mjs"
   },
   "engines": {
     "node": ">=20"
