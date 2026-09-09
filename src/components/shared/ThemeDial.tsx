@@ -94,8 +94,15 @@ export function ThemeDial({ current }: { current: ThemeId }) {
     });
 
     setLeaving(true);
-    const href = THEMES.find((t) => t.id === id)?.href ?? "/";
-    window.setTimeout(() => window.location.assign(href), VEIL_MS);
+    // Always "/" rather than the theme route. The rewrite in next.config.ts
+    // resolves it from the cookie we just set, so the address bar keeps a
+    // clean URL while the visitor still lands on their theme. The anchor href
+    // stays pointed at the real route, which is what keeps middle-click,
+    // open-in-new-tab and no-JS working.
+    window.setTimeout(() => {
+      if (window.location.pathname === "/") window.location.reload();
+      else window.location.assign("/");
+    }, VEIL_MS);
   }
 
   const veil =
