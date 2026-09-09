@@ -2,7 +2,7 @@ import { profile } from "@/content";
 import { GitHubIcon, LinkedInIcon, LeetCodeIcon, ArrowUpIcon } from "./Icons";
 
 export function Footer() {
-  const year = 2026;
+  const year = new Date().getFullYear();
   return (
     <footer className="relative z-10 border-t border-hairline">
       <div className="mx-auto flex max-w-[var(--container-page)] flex-col gap-6 px-6 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-8">

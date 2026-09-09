@@ -5,7 +5,10 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { nav, profile } from "@/content";
 import { GitHubIcon, LinkedInIcon, MenuIcon, CloseIcon, DocIcon } from "./Icons";
 
-const SECTION_IDS = ["hero", ...nav.map((n) => n.href.slice(1))];
+// "coding" is deliberately absent from the nav links but is still a section on
+// the page, so the observer has to watch it or the active indicator sticks on
+// Skills for the whole of it.
+const SECTION_IDS = ["hero", ...nav.map((n) => n.href.slice(1)), "coding"];
 
 export function Nav() {
   const [active, setActive] = useState("hero");

@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     url: siteUrl,
     title: `${profile.name} · ${profile.title}`,
     description,
-    siteName: `${profile.name} — Portfolio`,
+    siteName: `${profile.name} · Portfolio`,
   },
   twitter: {
     card: "summary_large_image",
@@ -69,6 +69,13 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${sora.variable} ${jetbrainsMono.variable} antialiased`}
+      // The pre-paint script below stamps data-theme-entering on this element
+      // before React hydrates, so the client html tag carries an attribute the
+      // server never rendered and React reports a mismatch. Suppression is the
+      // documented fix for exactly this case and is scoped to this element
+      // alone, not its subtree, so a genuine mismatch anywhere inside the page
+      // is still reported.
+      suppressHydrationWarning
     >
       <body>
         {/* Runs before the body paints. The previous page set this flag on its
