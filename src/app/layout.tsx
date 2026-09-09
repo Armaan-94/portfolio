@@ -17,7 +17,18 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500", "600"],
 });
 
-const siteUrl = "https://armaan-punia.vercel.app";
+/**
+ * The canonical origin for metadataBase, og:url and og:image.
+ *
+ * This was hard-coded to a hostname that returns 404, so every social preview
+ * pointed at a dead image and the canonical tags on the theme routes resolved
+ * to nothing. Vercel sets VERCEL_PROJECT_PRODUCTION_URL to the project's
+ * production domain, and to a custom domain once one is attached, so reading
+ * it means this cannot drift again. The literal is only the local fallback.
+ */
+const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : "http://localhost:3000";
 const description =
   "Armaan Punia is a software engineer building distributed backend systems, applied AI, and cloud infrastructure that ships to production.";
 
