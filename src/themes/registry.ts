@@ -39,6 +39,15 @@ export const THEMES: readonly ThemeMeta[] = [
     themeColor: "#0d1117",
   },
   {
+    id: "studio",
+    label: "Studio",
+    tagline: "Warm paper, pastel cards",
+    href: "/studio",
+    swatch: ["#fdf9f3", "#2c3145", "#d6efe0"],
+    scheme: "light",
+    themeColor: "#fdf9f3",
+  },
+  {
     id: "retro",
     label: "Retro",
     tagline: "Cream and brick on charcoal",
