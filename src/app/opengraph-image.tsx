@@ -3,7 +3,7 @@ import { profile } from "@/content";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = `${profile.name} — ${profile.title}`;
+export const alt = `${profile.name} · ${profile.title}`;
 
 // Generated social share image. Self-contained, matches the site palette.
 export default function OpengraphImage() {

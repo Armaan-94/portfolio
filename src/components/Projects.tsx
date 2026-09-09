@@ -35,7 +35,7 @@ export function Projects() {
 
 function ProjectCard({ project: p }: { project: Project }) {
   return (
-    <SpotlightCard className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-hairline bg-gradient-to-b from-surface to-surface-2 p-6 transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-indigo/50 hover:shadow-[0_12px_40px_-12px_rgba(99,102,241,0.35)]">
+    <SpotlightCard className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-hairline bg-gradient-to-b from-surface to-surface-2 p-6 transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-indigo/50 hover:shadow-card-hover">
       <div className="relative flex items-center justify-between">
         <span
           className={`inline-flex items-center rounded-md border px-2 py-0.5 font-mono text-[11px] ${categoryStyles[p.category]}`}
@@ -47,7 +47,7 @@ function ProjectCard({ project: p }: { project: Project }) {
       <h3 className="relative mt-4 text-xl font-semibold tracking-tight text-ink">
         {p.title}
       </h3>
-      <p className="relative mt-2 flex-1 text-sm leading-relaxed text-muted">
+      <p className="relative mt-2 flex-1 text-sm leading-relaxed text-body">
         {p.description}
       </p>
 

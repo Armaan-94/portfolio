@@ -23,15 +23,14 @@ export function About() {
           <div className="group relative aspect-[4/5] w-full max-w-xs overflow-hidden rounded-2xl border border-hairline bg-surface-2">
             <Image
               src="/armaan.jpg"
-              alt={`${profile.name} receiving an award on stage`}
+              alt={`${profile.name}, ${profile.title}`}
               fill
-              priority
               sizes="(max-width: 1024px) 20rem, 20rem"
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
               style={{ objectPosition: "64% 20%" }}
             />
             {/* bottom scrim for depth + a faint inner ring to frame it */}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-base/75 via-transparent to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-canvas/75 via-transparent to-transparent" />
             <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/[0.06]" />
           </div>
         </Reveal>

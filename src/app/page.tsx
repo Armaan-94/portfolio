@@ -7,10 +7,20 @@ import { Skills } from "@/components/Skills";
 import { CodingActivity } from "@/components/CodingActivity";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
+import { ThemeShell } from "@/themes/ThemeShell";
+import { ThemeDial } from "@/components/shared/ThemeDial";
 
+/**
+ * The default theme.
+ *
+ * Everything in src/components IS this theme; the other themes live in
+ * src/themes/<id> and render the same content from src/content.ts in their own
+ * way. ThemeShell renders no wrapper element for "default" on purpose, so this
+ * tree's DOM is exactly what it was before themes existed. See ThemeShell.
+ */
 export default function Home() {
   return (
-    <>
+    <ThemeShell theme="default">
       <Nav />
       <main id="content">
         <Hero />
@@ -25,6 +35,7 @@ export default function Home() {
         <Contact />
       </main>
       <Footer />
-    </>
+      <ThemeDial current="default" />
+    </ThemeShell>
   );
 }

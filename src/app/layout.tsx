@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     url: siteUrl,
     title: `${profile.name} · ${profile.title}`,
     description,
-    siteName: `${profile.name} — Portfolio`,
+    siteName: `${profile.name} · Portfolio`,
   },
   twitter: {
     card: "summary_large_image",
@@ -69,11 +69,28 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${sora.variable} ${jetbrainsMono.variable} antialiased`}
+      // The pre-paint script below stamps data-theme-entering on this element
+      // before React hydrates, so the client html tag carries an attribute the
+      // server never rendered and React reports a mismatch. Suppression is the
+      // documented fix for exactly this case and is scoped to this element
+      // alone, not its subtree, so a genuine mismatch anywhere inside the page
+      // is still reported.
+      suppressHydrationWarning
     >
       <body>
+        {/* Runs before the body paints. The previous page set this flag on its
+            way out, so an arriving theme fades up instead of snapping in. The
+            reduced-motion rule in globals.css collapses the fade to nothing
+            for free, since it clamps every animation duration. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              'try{if(sessionStorage.getItem("theme:entering")){sessionStorage.removeItem("theme:entering");document.documentElement.dataset.themeEntering="1"}}catch(e){}',
+          }}
+        />
         <a
           href="#content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:bg-indigo focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-base"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:bg-indigo focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-canvas"
         >
           Skip to content
         </a>
