@@ -29,6 +29,15 @@ All three must pass. If you've adopted Prettier locally, also run
 
 - **Content lives in `src/content.ts`.** Copy, projects, links, and numbers are
   edited there, not hard-coded in components.
+- **Themes** live in `src/themes/<id>/` and render the same `src/content.ts`
+  in their own way. Each is a static route under `src/app/<id>/`, and every
+  theme must render the seven section ids listed in `src/themes/contract.ts`;
+  a dev-only assertion reports any that are missing.
+- **The ASCII portrait** is generated from `public/ascii-source.jpg`. After
+  replacing that photo, run `npm run ascii` and commit the regenerated
+  `src/data/ascii-portrait.json`. `npm run ascii -- --preview` prints it to
+  the terminal for tuning, and the crop and tone constants can be overridden
+  with environment variables (see the top of the script).
 - **Commit messages** follow [Conventional Commits](https://www.conventionalcommits.org/)
   (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`) — this keeps history and the
   changelog readable.
