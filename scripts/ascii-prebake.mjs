@@ -25,7 +25,7 @@ import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const SRC = `${ROOT}public/ascii-source.jpg`;
+const SRC = `${ROOT}${process.env.ASCII_SRC ?? "assets/portrait-source.jpg"}`;
 const OUT = `${ROOT}src/data/ascii-portrait.json`;
 
 /* ---------------------------------------------------------------- tuning -- */
@@ -50,23 +50,26 @@ const ROTATE_DEG = num("ASCII_ROTATE", 0);
  * the top row of the portrait is a slice of mid-tone hair cut flat, which
  * reads as damage rather than as a crop.
  */
-const HEADROOM = num("ASCII_HEADROOM", 0.04);
+const HEADROOM = num("ASCII_HEADROOM", 0);
 
 /**
  * Crop, as fractions of the extended frame.
  *
- * Measured rather than guessed. Flood-filling the backdrop on the full image
- * and taking the subject's bounding box gives: centre x 0.467, head from the
- * top edge down to y 0.53, shoulders beginning at y 0.605. So the frame is
- * centred on 0.467 (which is what corrects the off-centre head), runs to just
- * past the shoulder line, and is 0.8 wide-over-tall to match the rendered
- * block so the resize introduces no distortion.
+ * Read off a coordinate grid rendered over the source rather than guessed.
+ *
+ * This is a close outdoor selfie, not a studio headshot, and the difference
+ * drives every value here. The head runs off both the right and the bottom
+ * edge, so there is no complete head to frame: the crop takes what exists,
+ * x 0.44 to 0.93 and y 0.18 down, and the block aspect follows the crop rather
+ * than the reverse, so nothing is squashed. The trees are as bright as the face
+ * and are not connected to the frame edge in any useful way, which is why this
+ * source uses BG_MODE=mask instead of the flood fill.
  */
 const CROP = {
-  x: num("ASCII_X", 0.209),
-  y: num("ASCII_Y", 0.0),
-  w: num("ASCII_W", 0.517),
-  h: num("ASCII_H", 0.72),
+  x: num("ASCII_X", 0.44),
+  y: num("ASCII_Y", 0.18),
+  w: num("ASCII_W", 0.49),
+  h: num("ASCII_H", 0.82),
 };
 
 /**
@@ -78,7 +81,7 @@ const CROP = {
  * which puts the head at roughly 32 rows: about the point where a face stops
  * being "a face" and starts being this specific person.
  */
-const ASPECT = num("ASCII_ASPECT", 0.8);
+const ASPECT = num("ASCII_ASPECT", 0.6);
 const TIERS = [
   { key: "wide", cols: 72 },
   { key: "narrow", cols: 52 },
@@ -89,8 +92,35 @@ const CONTRAST = num("ASCII_CONTRAST", 1.0);
 /** Fraction of the frame's peak Sobel magnitude above which a cell draws an
  *  edge glyph instead of a tone glyph. */
 const EDGE_THRESHOLD = num("ASCII_EDGE", 0.42);
+/**
+ * How the background is removed. This is source-dependent, not a preference.
+ *
+ *   flood     Flood fill a uniform backdrop inward from the border. Correct for
+ *             a studio headshot shot against a wall.
+ *   mask      Keep an ellipse and discard everything outside it. Correct for a
+ *             photo taken outdoors, where the background is as bright and as
+ *             textured as the face and there is simply nothing for a flood fill
+ *             to grab: without separation, keying by lightness removes parts of
+ *             the face and keeps parts of the trees.
+ *   none      Leave the frame alone.
+ */
+const BG_MODE = process.env.ASCII_BG_MODE ?? "mask";
+
+/** Ellipse for BG_MODE=mask, as fractions of the cropped frame. */
+const MASK = {
+  // Off-centre and generous. The head fills this crop and runs off two edges,
+  // so a tight ellipse clips the face; what actually needs removing is the
+  // stand of trees down the right side and the corners.
+  cx: num("ASCII_MASK_CX", 0.45),
+  cy: num("ASCII_MASK_CY", 0.52),
+  rx: num("ASCII_MASK_RX", 0.62),
+  ry: num("ASCII_MASK_RY", 0.6),
+  /** Falloff width, so the edge reads as a fade rather than a cut-out. */
+  feather: num("ASCII_MASK_FEATHER", 0.38),
+};
+
 /** Cells at or above this lightness, reachable from the border, are the studio
- *  backdrop rather than the subject. */
+ *  backdrop rather than the subject. Only used by BG_MODE=flood. */
 const BG_LIGHTNESS = num("ASCII_BG", 0.82);
 /** How far below the fill threshold a backdrop-adjacent cell may sit and still
  *  count as halo rather than subject. */
@@ -180,6 +210,37 @@ function backdropMask(lum, cols, rows) {
   return grown;
 }
 
+/**
+ * Everything outside an ellipse is background.
+ *
+ * Crude compared to a segmentation model, but honest about what it is: for a
+ * head-and-shoulders crop the subject IS roughly an ellipse, and a soft edge
+ * reads as a deliberately vignetted portrait rather than as a failed cut-out.
+ * Returns a soft mask, 0 = keep, 1 = discard, with intermediate values in the
+ * feather band.
+ */
+function ellipseMask(cols, rows) {
+  const m = new Float32Array(cols * rows);
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const nx = ((x + 0.5) / cols - MASK.cx) / MASK.rx;
+      const ny = ((y + 0.5) / rows - MASK.cy) / MASK.ry;
+      const d = Math.hypot(nx, ny);
+      const t = (d - (1 - MASK.feather)) / MASK.feather;
+      m[y * cols + x] = t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
+    }
+  }
+  return m;
+}
+
+function clampCrop(rw, rh) {
+  const left = Math.max(0, Math.min(rw - 1, Math.round(CROP.x * rw)));
+  const top = Math.max(0, Math.min(rh - 1, Math.round(CROP.y * rh)));
+  const width = Math.max(1, Math.min(rw - left, Math.round(CROP.w * rw)));
+  const height = Math.max(1, Math.min(rh - top, Math.round(CROP.h * rh)));
+  return { left, top, width, height };
+}
+
 async function sampleTier(cols) {
   const rows = Math.round((cols * 0.6) / ASPECT);
 
@@ -205,12 +266,10 @@ async function sampleTier(cols) {
   const rh = meta.height + pad;
 
   const data = await pipeline
-    .extract({
-      left: Math.round(CROP.x * rw),
-      top: Math.round(CROP.y * rh),
-      width: Math.round(CROP.w * rw),
-      height: Math.round(CROP.h * rh),
-    })
+    // Clamped to the frame. An out-of-bounds crop makes sharp throw
+    // "bad extract area", which is a needlessly cryptic way to learn that
+    // x + w drifted past 1.
+    .extract(clampCrop(rw, rh))
     // lanczos3 rather than the box filter a canvas drawImage would use: at an
     // 4:1 reduction a box filter visibly smears the eyes and mouth together.
     .resize(cols, rows, { fit: "fill", kernel: "lanczos3" })
@@ -225,12 +284,19 @@ async function sampleTier(cols) {
     raw[i] = lstar(data[o], data[o + 1], data[o + 2]);
   }
 
-  const bg = backdropMask(raw, cols, rows);
+  let bg;
+  if (BG_MODE === "flood") {
+    bg = backdropMask(raw, cols, rows);
+  } else if (BG_MODE === "mask") {
+    bg = ellipseMask(cols, rows);
+  } else {
+    bg = new Uint8Array(cols * rows);
+  }
 
   // Autolevels over the SUBJECT only. Including the backdrop would put the
   // white point on the wall and crush the whole face into three ramp steps.
   const subject = [];
-  for (let i = 0; i < n; i++) if (!bg[i]) subject.push(raw[i]);
+  for (let i = 0; i < n; i++) if (bg[i] < 0.5) subject.push(raw[i]);
   subject.sort((a, b) => a - b);
   const lo = subject[Math.floor(subject.length * 0.02)] ?? 0;
   const hi = subject[Math.floor(subject.length * 0.98)] ?? 1;
@@ -238,13 +304,13 @@ async function sampleTier(cols) {
 
   const tone = new Float32Array(n);
   for (let i = 0; i < n; i++) {
-    if (bg[i]) {
+    if (bg[i] >= 1) {
       tone[i] = 0;
       continue;
     }
     let t = Math.min(1, Math.max(0, (raw[i] - lo) / span));
     t = Math.min(1, Math.max(0, 0.5 + (t - 0.5) * CONTRAST));
-    tone[i] = t ** (1 / GAMMA);
+    tone[i] = (t ** (1 / GAMMA)) * (1 - bg[i]);
   }
 
   // Sobel. Border cells stay at zero rather than producing a bright ring
@@ -362,7 +428,7 @@ async function main() {
 
   if (preview) return;
 
-  result.source = "public/ascii-source.jpg";
+  result.source = SRC.replace(ROOT, "");
   result.generatedBy = "scripts/ascii-prebake.mjs";
   mkdirSync(dirname(OUT), { recursive: true });
   writeFileSync(OUT, JSON.stringify(result, null, 2) + "\n");

@@ -38,7 +38,7 @@ All three must pass. If you've adopted Prettier locally, also run
   `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in `.env.local`, with the
   token scoped to `Account | Workers AI | Read` and nothing else. Pass a
   `--seed` for anything committed, so the asset can be regenerated exactly.
-- **The ASCII portrait** is generated from `public/ascii-source.jpg`. After
+- **The ASCII portrait** is generated from `public/portrait.jpg`. After
   replacing that photo, run `npm run ascii` and commit the regenerated
   `src/data/ascii-portrait.json`. `npm run ascii -- --preview` prints it to
   the terminal for tuning, and the crop and tone constants can be overridden
