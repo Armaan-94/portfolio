@@ -206,13 +206,31 @@ export function OrbScene() {
   // lands rather than as a mystery clipping bug. Development only.
   useEffect(() => {
     if (process.env.NODE_ENV === "production" || !traveling) return;
-    const risky = ["transform", "filter", "perspective", "contain"] as const;
+    // Every property that promotes an element to the containing block for its
+    // fixed descendants. The original list covered four; backdrop-filter,
+    // container-type and will-change are the three a new theme wrapper or a
+    // "glass" overlay is most likely to introduce, so they matter most.
+    // will-change only counts when it names a property that would itself
+    // create one, which is why these are predicates and not a bare !== "none".
+    const risky: ReadonlyArray<readonly [string, (v: string) => boolean]> = [
+      ["transform", (v) => v !== "none"],
+      ["filter", (v) => v !== "none"],
+      ["backdrop-filter", (v) => v !== "none"],
+      ["-webkit-backdrop-filter", (v) => v !== "none"],
+      ["perspective", (v) => v !== "none"],
+      ["contain", (v) => /(paint|layout|strict|content)/.test(v)],
+      ["container-type", (v) => v !== "normal"],
+      [
+        "will-change",
+        (v) => /(transform|perspective|filter|backdrop-filter|contain)/.test(v),
+      ],
+    ];
     let node = ref.current?.parentElement ?? null;
     while (node && node !== document.documentElement) {
       const style = getComputedStyle(node);
-      for (const prop of risky) {
+      for (const [prop, isRisky] of risky) {
         const value = style.getPropertyValue(prop);
-        if (value && value !== "none" && value !== "normal") {
+        if (value && isRisky(value)) {
           console.warn(
             `[OrbScene] <${node.tagName.toLowerCase()}> sets ${prop}: ${value}. ` +
               "That makes it the containing block for the fixed orb layer, " +

@@ -5,7 +5,10 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { nav, profile } from "@/content";
 import { GitHubIcon, LinkedInIcon, MenuIcon, CloseIcon, DocIcon } from "./Icons";
 
-const SECTION_IDS = ["hero", ...nav.map((n) => n.href.slice(1))];
+// "coding" is deliberately absent from the nav links but is still a section on
+// the page, so the observer has to watch it or the active indicator sticks on
+// Skills for the whole of it.
+const SECTION_IDS = ["hero", ...nav.map((n) => n.href.slice(1)), "coding"];
 
 export function Nav() {
   const [active, setActive] = useState("hero");
@@ -50,7 +53,7 @@ export function Nav() {
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
         scrolled
-          ? "border-b border-hairline bg-base/80 backdrop-blur-md"
+          ? "border-b border-hairline bg-canvas/80 backdrop-blur-md"
           : "border-b border-transparent"
       }`}
     >
@@ -151,7 +154,7 @@ export function Nav() {
             animate={{ opacity: 1, y: 0 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="border-b border-hairline bg-base/95 backdrop-blur-md md:hidden"
+            className="border-b border-hairline bg-canvas/95 backdrop-blur-md md:hidden"
           >
             <ul className="mx-auto flex max-w-[var(--container-page)] flex-col px-6 py-4">
               {nav.map((item) => (

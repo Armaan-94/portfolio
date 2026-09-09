@@ -1,11 +1,17 @@
 @import "tailwindcss";
 
+/* Per-theme token overrides. Imported here because @import must precede other
+   rules; position does not affect the cascade, since a theme block scopes its
+   values to the ThemeShell div while :root scopes them to <html>, and a value
+   set on an element always shadows the one it would inherit. */
+@import "./themes.css";
+
 /* ------------------------------------------------------------------ */
 /*  Design tokens (established personal brand)                         */
 /* ------------------------------------------------------------------ */
 @theme {
   /* Backgrounds & surfaces */
-  --color-base: #0d1117;
+  --color-canvas: #0d1117;
   --color-surface: #10182a;
   --color-surface-2: #0f1420;
   --color-hairline: #21262d;
@@ -20,7 +26,11 @@
   --color-ink: #e6edf3;
   --color-body: #c9d1d9;
   --color-muted: #8b949e;
-  --color-faint: #6e7681;
+  /* Was #6e7681, which measured 4.12:1 on the base and 3.85:1 on the surface:
+     under AA on every ground it appears on, while carrying a privacy claim, a
+     location, a badge and a heatmap legend. #8b93a1 clears 4.5:1 on all three. */
+  --color-faint: #8b93a1;
+  --color-danger: #fca5a5;
 
   /* Heatmap greens */
   --color-hm-0: #161b22;
@@ -39,6 +49,11 @@
   /* House easing. Mirrored as the EASE constant in components/Reveal.tsx and
      the literal in the .sheen transition below; new work should use this. */
   --ease-house: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Card lift on hover. A token so a theme can flatten it: screen print and
+     instrument panels have no drop shadows at all. */
+  --shadow-card-hover: 0 12px 40px -12px
+    color-mix(in srgb, var(--color-deep-indigo) 35%, transparent);
 }
 
 /* ------------------------------------------------------------------ */
@@ -46,16 +61,45 @@
 /* ------------------------------------------------------------------ */
 :root {
   color-scheme: dark;
+
+  /* Values with no Tailwind namespace, so they are plain custom properties
+     rather than @theme entries. Each is a whole CSS value, not a colour stop,
+     because the themes need to change the *shape* of these and not just the
+     hue: weyland draws hairline rules where default draws dots, and retro
+     overlays film grain where neither of the others has any. */
+  --scroll-pad: 6rem;
+
+  --grid-image: radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--color-muted) 9%, transparent) 1px,
+    transparent 1px
+  );
+  --grid-size: 32px 32px;
+
+  --gradient-wordmark: linear-gradient(
+    100deg,
+    #e6ebff,
+    #a5b4fc 38%,
+    #bae6fd 68%,
+    #e6ebff
+  );
+
+  --glass-hi: rgba(255, 255, 255, 0.1);
+  --glass-inner: rgba(255, 255, 255, 0.02);
+  --glass-shadow: 0 12px 34px -16px rgba(0, 0, 0, 0.75);
+  --glare: rgba(255, 255, 255, 0.22);
+  --glare-strong: rgba(255, 255, 255, 0.28);
 }
 
 html {
   scroll-behavior: smooth;
-  /* offset for the sticky nav when jumping to anchors */
-  scroll-padding-top: 6rem;
+  /* offset for the sticky nav when jumping to anchors. Each theme sets
+     --scroll-pad to its own header height. */
+  scroll-padding-top: var(--scroll-pad, 6rem);
 }
 
 body {
-  background-color: var(--color-base);
+  background-color: var(--color-canvas);
   color: var(--color-body);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -84,31 +128,32 @@ button {
 
 /* Faint dotted grid backdrop, used behind the page */
 .bg-grid {
-  background-image: radial-gradient(
-    circle at center,
-    rgba(139, 148, 158, 0.09) 1px,
-    transparent 1px
-  );
-  background-size: 32px 32px;
+  background-image: var(--grid-image);
+  background-size: var(--grid-size);
 }
 
 /* Animated gradient text (hero wordmark / headline accent). Soft, high-
    luminance cool tones so the name stays clearly legible over the scene; the
    drift is gentle and unhurried rather than distracting. */
 .text-gradient {
-  background-image: linear-gradient(
-    100deg,
-    #e6ebff,
-    #a5b4fc 38%,
-    #bae6fd 68%,
-    #e6ebff
-  );
+  background-image: var(--gradient-wordmark);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   text-shadow: 0 1px 30px color-mix(in srgb, var(--color-indigo) 22%, transparent);
   animation: gradient-pan 10s linear infinite;
+}
+
+/* color: transparent above means that if background-clip: text is ever
+   unavailable the name renders invisible rather than merely unstyled. Cheap
+   insurance against a blank hero. */
+@supports not ((background-clip: text) or (-webkit-background-clip: text)) {
+  .text-gradient {
+    background-image: none;
+    color: var(--color-ink);
+    text-shadow: none;
+  }
 }
 
 @keyframes gradient-pan {
@@ -182,9 +227,9 @@ button {
   -webkit-backdrop-filter: blur(10px) saturate(135%);
   border: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.02),
-    0 12px 34px -16px rgba(0, 0, 0, 0.75);
+    inset 0 1px 0 0 var(--glass-hi),
+    inset 0 0 0 1px var(--glass-inner),
+    var(--glass-shadow);
 }
 
 /* Cursor glare that tracks the pointer across a magnetic control. The
@@ -202,7 +247,7 @@ button {
   inset: 0;
   background: radial-gradient(
     150px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(255, 255, 255, 0.22),
+    var(--glare),
     transparent 60%
   );
   opacity: 0;
@@ -242,7 +287,7 @@ button {
   background: linear-gradient(
     115deg,
     transparent 30%,
-    rgba(255, 255, 255, 0.28) 50%,
+    var(--glare-strong) 50%,
     transparent 70%
   );
   transform: translateX(-130%);
@@ -392,19 +437,81 @@ button {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/*  Theme switching                                                    */
+/* ------------------------------------------------------------------ */
+
+/* Switching themes is a full document load, so the outgoing page is covered
+   before it navigates and the incoming one fades up. Both use opacity only.
+   Opacity creates a stacking context but NOT a containing block, so neither
+   can capture the default theme's fixed orb layer the way a transform or a
+   filter would. */
+@keyframes theme-veil {
+  to {
+    opacity: 1;
+  }
+}
+
+.theme-veil {
+  opacity: 0;
+  animation: theme-veil 220ms ease-out forwards;
+}
+
+@keyframes theme-enter {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Set by a pre-paint script in the root layout when the previous page handed
+   over. Absent on a normal visit, so a cold load never pays for it. */
+[data-theme-entering] body {
+  animation: theme-enter 320ms var(--ease-house) both;
+}
+
 /* Reduced motion: kill non-essential animation */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
-  .text-gradient {
-    animation: none;
+
+  /* Looping decoration is removed outright rather than clamped. A clamped
+     infinite animation still runs, it just lands on an arbitrary frame, which
+     is how a sweeping highlight ends up parked across the middle of something
+     forever. Anything that loops belongs in this list. */
+  .text-gradient,
+  .scroll-rise,
+  .rule-draw,
+  .scroll-progress,
+  .cascade-run > span,
+  [data-orb-traveling] .hero-scrim,
+  [data-orb-traveling] .hero-edge {
+    animation: none !important;
   }
+
   *,
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+  }
+
+  /* Feedback is not motion. Zeroing every transition also removes the colour
+     response on hover and focus, which is a usability regression rather than a
+     motion reduction. Interactive elements keep a duration, but only for
+     properties that cannot move anything. */
+  a,
+  button,
+  summary,
+  input,
+  textarea,
+  select,
+  [role="button"],
+  .card-spotlight::before,
+  .btn-magnetic::before {
+    transition-property: color, background-color, border-color, outline-color,
+      fill, stroke, opacity !important;
+    transition-duration: 200ms !important;
   }
 }

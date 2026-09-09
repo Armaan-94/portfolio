@@ -3,6 +3,7 @@
 import { createElement } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import type { ElementType, ReactNode } from "react";
+import { EASE_HOUSE } from "@/lib/easing";
 
 type RevealTag = "div" | "li" | "section" | "article" | "span";
 type RevealVariant = "fade" | "wipe";
@@ -26,7 +27,7 @@ type RevealProps = {
 };
 
 /** Shared house easing. Also mirrored in globals.css as --ease-house. */
-const EASE = [0.22, 1, 0.36, 1] as const;
+const EASE = EASE_HOUSE;
 
 /**
  * Subtle, quick scroll-into-view reveal (fade + translate up).

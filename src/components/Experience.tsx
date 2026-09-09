@@ -21,7 +21,7 @@ export function Experience() {
           <li key={`${job.company}-${i}`} className="relative pl-8 pb-12 last:pb-0 sm:pl-10">
             {/* node */}
             <span
-              className="absolute left-0 top-1.5 grid h-4 w-4 place-items-center rounded-full border border-hairline bg-base sm:h-[18px] sm:w-[18px]"
+              className="absolute left-0 top-1.5 grid h-4 w-4 place-items-center rounded-full border border-hairline bg-canvas sm:h-[18px] sm:w-[18px]"
               aria-hidden
             >
               <span className="h-1.5 w-1.5 rounded-full bg-indigo shadow-[0_0_8px_1px_var(--color-indigo)]" />

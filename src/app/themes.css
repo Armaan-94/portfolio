@@ -1,0 +1,528 @@
+/* ------------------------------------------------------------------ */
+/*  Theme token overrides                                              */
+/* ------------------------------------------------------------------ */
+
+/* These blocks are deliberately UNLAYERED. Tailwind emits its @theme tokens
+   inside `@layer theme`, and unlayered declarations beat every layer no matter
+   the specificity, so a plain [data-theme] selector here overrides :root
+   without the @theme block in globals.css having to change at all. That is
+   what keeps the default theme's compiled CSS byte-for-byte what it was.
+
+   Each theme redefines the SEMANTIC tokens (--color-ink, --color-canvas, and
+   so on) so every existing utility follows it, then adds its own private
+   --rt- and --wy- values for things with no Tailwind
+   namespace.
+
+   TOKEN blocks stay unlayered. COMPONENT classes do not, and the difference
+   matters: unlayered rules beat every layer, so an unlayered .st-key setting
+   display:inline-flex silently overrode Tailwind's md:hidden and left the
+   mobile menu button visible on desktop. Component classes therefore live in
+   @layer components, which utilities are allowed to override, exactly as they
+   would for any other component class. */
+
+/* ================================================================== */
+/*  weyland - instrument panel                                         */
+/* ================================================================== */
+[data-theme="weyland"] {
+  /* Measured on the #08110F ground:
+       ink      #D9F2E6  16.21:1  body
+       ink-dim  #7FA898   7.12:1  captions, still real text
+       alert    #E8B04B   9.75:1  the one warm accent, used sparingly
+       line     #1E3A33   1.56:1  decorative hairlines
+       line-hot #3F6B5C   3.16:1  boundaries that carry meaning */
+  --wy-ground: #08110f;
+  --wy-ink: #d9f2e6;
+  --wy-ink-dim: #7fa898;
+  --wy-line: #1e3a33;
+  --wy-line-hot: #3f6b5c;
+  --wy-alert: #e8b04b;
+
+  --color-canvas: var(--wy-ground);
+  --color-surface: #0c1a16;
+  --color-surface-2: #0a1512;
+  --color-hairline: var(--wy-line);
+  --color-ink: var(--wy-ink);
+  --color-body: var(--wy-ink);
+  --color-muted: var(--wy-ink-dim);
+  --color-faint: #5c7d70;
+  --color-indigo: var(--wy-alert);
+  --color-violet: var(--wy-alert);
+  --color-deep-indigo: var(--wy-alert);
+  --color-cyan: var(--wy-ink);
+  --color-danger: var(--wy-alert);
+
+  /* No fills, no shadows, no radii anywhere in this theme. */
+  --shadow-card-hover: none;
+  --gradient-wordmark: none;
+  /* Hairline rules rather than the default theme's dots. */
+  --grid-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 23px,
+      color-mix(in srgb, var(--wy-line) 70%, transparent) 23px 24px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 23px,
+      color-mix(in srgb, var(--wy-line) 70%, transparent) 23px 24px
+    );
+  --grid-size: 24px 24px;
+
+  /* Wider than the others on purpose: a console should feel like the whole
+     panel, not a column of content sitting inside one. */
+  --container-page: 1440px;
+  --scroll-pad: 3.25rem;
+
+  --font-sans: var(--font-jetbrains), ui-monospace, monospace;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+@layer components {
+  /* Labels shout. Prose does not: four lines of tracked uppercase is genuinely
+     hard to read, and science fiction is not a licence for that. Body copy in
+     this theme is 14px sentence case. */
+  [data-theme="weyland"] .wy-label {
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--wy-ink-dim);
+  }
+
+  [data-theme="weyland"] .wy-micro {
+    font-size: 0.625rem;
+    line-height: 1.4;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--wy-ink-dim);
+  }
+
+  [data-theme="weyland"] .wy-title {
+    font-size: 1.125rem;
+    line-height: 1.15;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--wy-ink);
+  }
+
+  /* Four corner ticks, which is what makes a plain box read as a viewport in
+     an instrument rather than as a card. */
+  [data-theme="weyland"] .wy-ticks {
+    position: relative;
+  }
+  [data-theme="weyland"] .wy-ticks::before,
+  [data-theme="weyland"] .wy-ticks::after {
+    content: "";
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    pointer-events: none;
+    border-color: var(--wy-ink);
+  }
+  [data-theme="weyland"] .wy-ticks::before {
+    top: -1px;
+    left: -1px;
+    border-top: 1px solid;
+    border-left: 1px solid;
+  }
+  [data-theme="weyland"] .wy-ticks::after {
+    right: -1px;
+    bottom: -1px;
+    border-right: 1px solid;
+    border-bottom: 1px solid;
+  }
+
+  /* Dot leader. A console command row reads as a row, not as a button. */
+  [data-theme="weyland"] .wy-leader {
+    flex: 1;
+    border-bottom: 1px dotted var(--wy-line-hot);
+    transform: translateY(-0.28em);
+  }
+
+  [data-theme="weyland"] .wy-row {
+    transition: border-color 90ms steps(2);
+  }
+  [data-theme="weyland"] .wy-row:hover {
+    border-color: var(--wy-ink);
+  }
+  [data-theme="weyland"] .wy-row:hover .wy-caret {
+    transform: translateX(4px);
+  }
+  [data-theme="weyland"] .wy-caret {
+    transition: transform 90ms steps(2);
+  }
+
+  /* Status square, blinking rather than fading: an indicator lamp is on or
+     off, it does not cross-dissolve. */
+  [data-theme="weyland"] .wy-blip {
+    animation: wy-blink 2s steps(2, jump-none) infinite;
+  }
+
+  /* The ASCII portrait grid.
+     JetBrains Mono ships coding ligatures and the ramp contains = + ~ - : while
+     the edge set contains | / . Sequences like =~ // := -| WILL ligate and
+     collapse two cells into one, which shears the whole grid. Disabling them is
+     load-bearing, not hygiene. */
+  [data-theme="weyland"] .wy-ascii {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-feature-settings:
+      "liga" 0,
+      "calt" 0;
+    line-height: 1;
+    white-space: pre;
+    user-select: none;
+    color: var(--wy-ink);
+    /* Sized from the container so the block always fills its panel exactly.
+       Both baked tiers are the same 0.8 aspect, so switching between them
+       never moves the layout. */
+    font-size: calc(100cqw / (var(--ascii-cols) * 0.6));
+    width: 100%;
+    contain: content;
+  }
+
+  [data-theme="weyland"] .wy-ascii-frame {
+    container-type: inline-size;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* The scanline is a compositor-only gradient over the text rather than
+     per-character colour: it cannot desync from the glyphs, and it costs the
+     main thread nothing. */
+  [data-theme="weyland"] .wy-scan {
+    position: absolute;
+    inset-inline: 0;
+    height: 22%;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in srgb, var(--wy-ink) 20%, transparent) 50%,
+      transparent
+    );
+    animation: wy-sweep 6s linear infinite;
+    animation-delay: 1.4s;
+  }
+
+  [data-theme="weyland"] .wy-ascii.is-glitching {
+    text-shadow:
+      2px 0 0 color-mix(in srgb, var(--wy-ink) 45%, transparent),
+      -2px 0 0 color-mix(in srgb, #7fd8c4 45%, transparent);
+  }
+}
+
+@keyframes wy-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes wy-sweep {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(555%);
+  }
+}
+
+/* mix-blend-mode is undefined under forced colours, so the sweep is removed
+   rather than left to render as an opaque bar across the face. */
+@media (forced-colors: active) {
+  [data-theme="weyland"] .wy-scan {
+    display: none;
+  }
+}
+
+/* ================================================================== */
+/*  studio - warm paper, pastel bento                                  */
+/* ================================================================== */
+[data-theme="studio"] {
+  --st-paper: #fdf9f3;
+  --st-ink: #2c3145;    /* 12.27:1 on paper, 9.7-11.5:1 on every card hue */
+  --st-ink-2: #5a6076;  /* 6.07:1 on paper, 4.8:1 on the darkest hue */
+
+  /* Card fill and its border.
+     "Adjacent cards must contrast" cannot be checked with WCAG ratios here:
+     every one of these sits at OKLCh lightness 0.91-0.95, so all 21 pairings
+     measure between 1.01 and 1.11:1. Luminance is the wrong axis. The rule
+     that does work is a hue-angle separation of at least 25 degrees between
+     neighbours, plus a border that clears 1.55:1 against the paper.
+     Every pair clears 25 degrees except peach/paper (13.4) and butter/paper
+     (16.1), which means those two cards are identified almost entirely by
+     their border, and butter's original #EBD98A measured only 1.35:1. Hence
+     the darker #DCC46A. That is the one value here that is not from the
+     reference. */
+  --st-mint: #d6efe0;    --st-mint-edge: #a8d6be;
+  --st-pink: #fbdde4;    --st-pink-edge: #f0aec0;
+  --st-lav: #e4ddf5;     --st-lav-edge: #bcaee4;
+  --st-peach: #fce3cc;   --st-peach-edge: #f2be8a;
+  --st-sky: #d8e8f7;     --st-sky-edge: #a6c9e8;
+  --st-butter: #fbf0c8;  --st-butter-edge: #dcc46a;
+
+  --color-canvas: var(--st-paper);
+  --color-surface: #ffffff;
+  --color-surface-2: var(--st-paper);
+  --color-hairline: #e4ddd2;
+  --color-ink: var(--st-ink);
+  --color-body: var(--st-ink);
+  --color-muted: var(--st-ink-2);
+  --color-faint: #7a8093;
+  --color-indigo: var(--st-ink);
+  --color-violet: var(--st-ink);
+  --color-deep-indigo: var(--st-ink);
+  --color-cyan: #3f7d5e;
+  --color-danger: #b23a48;
+
+  --grid-image: none;
+  --grid-size: 0 0;
+  --gradient-wordmark: none;
+  --shadow-card-hover: none;
+
+  --container-page: 1200px;
+  --scroll-pad: 5.5rem;
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+/* The CSS property beats the meta tag, and globals.css sets color-scheme:dark
+   on :root. Without this the native form controls, the scrollbar and Chrome's
+   autofill background all stay dark on a light page. */
+html:has([data-theme="studio"]) {
+  color-scheme: light;
+  background-color: #fdf9f3;
+}
+
+@layer components {
+/* One card, six hues. The fill and edge are set by a hue class so the card
+   itself never names a colour. */
+[data-theme="studio"] .st-card {
+  background: var(--card-fill, #fff);
+  border: 1.5px solid var(--card-edge, var(--color-hairline));
+  /* A printed edge, not a blur. Every surface in this theme uses this one
+     recipe, which is what stops six card types drifting into six shadows. */
+  box-shadow: 0 2px 0 0 var(--card-edge, var(--color-hairline));
+  border-radius: 22px;
+}
+
+[data-theme="studio"] .st-mint   { --card-fill: var(--st-mint);   --card-edge: var(--st-mint-edge); }
+[data-theme="studio"] .st-pink   { --card-fill: var(--st-pink);   --card-edge: var(--st-pink-edge); }
+[data-theme="studio"] .st-lav    { --card-fill: var(--st-lav);    --card-edge: var(--st-lav-edge); }
+[data-theme="studio"] .st-peach  { --card-fill: var(--st-peach);  --card-edge: var(--st-peach-edge); }
+[data-theme="studio"] .st-sky    { --card-fill: var(--st-sky);    --card-edge: var(--st-sky-edge); }
+[data-theme="studio"] .st-butter { --card-fill: var(--st-butter); --card-edge: var(--st-butter-edge); }
+[data-theme="studio"] .st-plain  { --card-fill: transparent;      --card-edge: var(--st-mint-edge); }
+
+/* Keycap. The asymmetric padding IS the key height: 2px more below than above
+   reads as depth without a gradient or a shadow blur. */
+[data-theme="studio"] .st-key {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  padding: 7px 10px 9px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1.5px solid var(--card-edge, var(--color-hairline));
+  box-shadow: 0 2px 0 0 var(--card-edge, var(--color-hairline));
+  color: var(--st-ink);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-theme="studio"] .st-key:hover {
+    transform: translateY(2px);
+    box-shadow: 0 0 0 0 var(--card-edge, var(--color-hairline));
+  }
+}
+
+/* The card's corner label. Present on every card, which is the repetition
+   element that ties the bento together. */
+[data-theme="studio"] .st-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--st-ink) 62%, transparent);
+}
+
+/* Sticker: one per card, bordered in that card's own hue so it reads as part
+   of the system rather than decoration applied on top of it. */
+[data-theme="studio"] .st-sticker {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  background: #fff;
+  border: 1.5px solid var(--card-edge, var(--color-hairline));
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--st-ink);
+}
+}
+
+/* ================================================================== */
+/*  retro - American screen-print poster                               */
+/* ================================================================== */
+[data-theme="retro"] {
+  /* Palette. The three source colours are cream, brick and sage on charcoal.
+     Measured against the #1a1a1a ground:
+       cream #DCC9A9  10.75:1  body text
+       brick #B83A2D   3.05:1  FILLS AND RULES ONLY, never body text
+       sage  #4E6851   2.84:1  FILLS ONLY, fails even the large-text 3:1 bar
+     So brick and sage each get a lightened sibling for the cases where they
+     genuinely have to carry text. Using the poster colours as ink directly is
+     the single easiest way to fail this theme. */
+  --rt-char: #1a1a1a;
+  --rt-cream: #dcc9a9;
+  --rt-cream-2: #b8a88c;
+  --rt-paper: #e8dcc4;
+  --rt-brick: #b83a2d;
+  --rt-brick-txt: #dd6449; /* 4.97:1 on char */
+  --rt-sage: #4e6851;
+  --rt-sage-txt: #7a9a7e; /* 5.60:1 on char */
+  /* Cream measures only 3.52:1 on brick, which clears the 3:1 large-text bar
+     and fails the 4.5:1 body bar. Large display type on a brick panel keeps
+     the true cream; anything smaller uses this paler one, at 4.98:1. */
+  --rt-cream-hi: #f5efe3;
+  --rt-dropcap: var(--rt-brick-txt);
+
+  /* Semantic tokens, so shared utilities follow the theme */
+  --color-canvas: var(--rt-char);
+  --color-surface: #232323;
+  --color-surface-2: #1f1f1f;
+  --color-hairline: #4a4238;
+  --color-ink: var(--rt-cream);
+  --color-body: var(--rt-cream);
+  --color-muted: var(--rt-cream-2);
+  --color-faint: #8a7f6a;
+  --color-indigo: var(--rt-brick-txt);
+  --color-violet: var(--rt-brick);
+  --color-deep-indigo: var(--rt-brick);
+  --color-cyan: var(--rt-sage-txt);
+  --color-danger: var(--rt-brick-txt);
+
+  /* Print has no drop shadows and no soft backdrops. */
+  --shadow-card-hover: none;
+  --grid-image: none;
+  --grid-size: 0 0;
+  --gradient-wordmark: none;
+
+  --container-page: 1280px;
+  --scroll-pad: 5rem;
+
+  --font-sans: var(--font-bitter), Georgia, serif;
+  --font-mono: var(--font-bitter), Georgia, serif;
+  --font-display: var(--font-anton), Impact, sans-serif;
+
+  /* Film grain, as an inline feTurbulence rather than a PNG. ~180 bytes and no
+     network request. Applied to ONE fixed full-viewport pseudo-element, never
+     per section: one rasterisation, and being fixed it never repaints on
+     scroll. Never combine this with backdrop-filter. */
+  --rt-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* A filter attribute cannot be changed from CSS, and 0.82 moires on retina, so
+   the high-DPI grain is a second data URI rather than a tweak. Worth 200 bytes. */
+@media (min-resolution: 2dppx) {
+  [data-theme="retro"] {
+    --rt-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+@layer components {
+[data-theme="retro"] .rt-grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background-image: var(--rt-grain);
+  opacity: 0.055;
+  mix-blend-mode: overlay;
+}
+
+/* Halftone dot field. Rotated 15deg on an oversized child, because
+   axis-aligned dots read as "CSS" and rotated dots read as "screen print". */
+[data-theme="retro"] .rt-halftone {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+[data-theme="retro"] .rt-halftone::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background-image: radial-gradient(currentColor 0.9px, transparent 1px);
+  background-size: 4px 4px;
+  opacity: 0.14;
+  transform: rotate(15deg);
+  pointer-events: none;
+}
+
+/* Drop cap. ::first-letter rather than a wrapper span, which breaks reading
+   order in some assistive tech. Sized from (lines x body line-height) over
+   Bitter's ~0.72em cap height; browsers disagree on the box maths by a pixel
+   or two, so this is tuned against the rendered baseline. */
+[data-theme="retro"] .rt-lede::first-letter {
+  float: left;
+  font-family: var(--font-display);
+  font-size: 3.6em;
+  line-height: 0.82;
+  padding: 0.02em 0.1em 0 0;
+  color: var(--rt-dropcap);
+}
+
+/* Poster rules: the masthead name flushes both edges by tracking each line
+   individually, never by text-align: justify. */
+[data-theme="retro"] .rt-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 0.84;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+}
+
+[data-theme="retro"] .rt-caption {
+  font-size: 0.75rem;
+  line-height: 1.35;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Inside a brick panel the drop cap would be brick on brick, i.e. invisible,
+   and body copy would sit at 3.52:1. Both are re-inked here rather than at
+   every call site, so the rule cannot be forgotten at one of them. */
+[data-theme="retro"] .rt-on-brick {
+  --rt-dropcap: var(--rt-cream-hi);
+  color: var(--rt-cream-hi);
+}
+
+/* Mis-registration on the masthead only, the way a two-pass screen print
+   never quite lines up. */
+[data-theme="retro"] .rt-misprint {
+  text-shadow: 1.5px 1.5px 0 color-mix(in srgb, var(--rt-brick) 22%, transparent);
+}
+
+/* Underline that draws in on hover, as one background-size transition. */
+[data-theme="retro"] .rt-rule-link {
+  background-image: linear-gradient(var(--rt-brick), var(--rt-brick));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 3px;
+  transition: background-size 0.35s var(--ease-house);
+}
+[data-theme="retro"] .rt-rule-link:hover,
+[data-theme="retro"] .rt-rule-link:focus-visible {
+  background-size: 100% 3px;
+}
+}

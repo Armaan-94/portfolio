@@ -1,14 +1,12 @@
 import type { CSSProperties } from "react";
 
 import { leetcode } from "@/content";
-import { getLeetCodeData } from "@/lib/leetcode";
+import { getLeetCodeData, WEEKS, DAYS } from "@/lib/leetcode";
 import { Section } from "./Section";
 import { Reveal } from "./Reveal";
 import { Cascade } from "./Cascade";
 import { LeetCodeIcon, ExternalIcon } from "./Icons";
 
-const WEEKS = 53;
-const DAYS = 7;
 const HEAT_COLORS = [
   "var(--color-hm-0)",
   "var(--color-hm-1)",
@@ -50,7 +48,7 @@ export function CodingActivity() {
             {/* header row */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
-                <span className="grid h-10 w-10 place-items-center rounded-lg border border-hairline bg-base text-cyan">
+                <span className="grid h-10 w-10 place-items-center rounded-lg border border-hairline bg-canvas text-cyan">
                   <LeetCodeIcon width={20} height={20} />
                 </span>
                 <div>
@@ -74,7 +72,7 @@ export function CodingActivity() {
               {numbers.map((n) => (
                 <div
                   key={n.label}
-                  className="rounded-lg border border-hairline bg-base/40 px-4 py-3"
+                  className="rounded-lg border border-hairline bg-canvas/40 px-4 py-3"
                 >
                   <dt className="font-mono text-[11px] tracking-wide text-muted uppercase">
                     {n.label}
