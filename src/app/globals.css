@@ -26,7 +26,10 @@
   --color-ink: #e6edf3;
   --color-body: #c9d1d9;
   --color-muted: #8b949e;
-  --color-faint: #6e7681;
+  /* Was #6e7681, which measured 4.12:1 on the base and 3.85:1 on the surface:
+     under AA on every ground it appears on, while carrying a privacy claim, a
+     location, a badge and a heatmap legend. #8b93a1 clears 4.5:1 on all three. */
+  --color-faint: #8b93a1;
   --color-danger: #fca5a5;
 
   /* Heatmap greens */

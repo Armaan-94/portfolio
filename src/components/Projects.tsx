@@ -47,7 +47,7 @@ function ProjectCard({ project: p }: { project: Project }) {
       <h3 className="relative mt-4 text-xl font-semibold tracking-tight text-ink">
         {p.title}
       </h3>
-      <p className="relative mt-2 flex-1 text-sm leading-relaxed text-muted">
+      <p className="relative mt-2 flex-1 text-sm leading-relaxed text-body">
         {p.description}
       </p>
 

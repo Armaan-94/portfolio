@@ -110,7 +110,7 @@ export function Contact() {
                 </div>
                 <h3 className="mt-4 text-lg font-semibold text-ink">Message sent</h3>
                 <p className="mt-2 max-w-sm text-sm text-muted">
-                  Thanks for reaching out — it landed in my inbox and I&rsquo;ll get
+                  Thanks for reaching out. It landed in my inbox and I&rsquo;ll get
                   back to you soon.
                 </p>
                 <button

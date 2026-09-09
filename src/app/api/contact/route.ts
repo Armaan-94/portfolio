@@ -62,9 +62,9 @@ export async function POST(req: Request) {
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.error("[contact] RESEND_API_KEY is not set — cannot send email.");
+    console.error("[contact] RESEND_API_KEY is not set, cannot send email.");
     return NextResponse.json(
-      { error: "The form isn't wired up yet — please email me directly for now." },
+      { error: "The form is not wired up yet. Please email me directly for now." },
       { status: 503 }
     );
   }
@@ -80,7 +80,7 @@ export async function POST(req: Request) {
       to,
       replyTo: email,
       subject: `Portfolio message from ${name}`,
-      text: `${message}\n\n— ${name} <${email}>`,
+      text: `${message}\n\nFrom ${name} <${email}>`,
       html: `
         <div style="font-family:ui-sans-serif,system-ui,sans-serif;line-height:1.6;color:#0d1117">
           <p style="margin:0 0 12px;white-space:pre-wrap">${escapeHtml(message)}</p>
@@ -94,7 +94,7 @@ export async function POST(req: Request) {
     if (error) {
       console.error("[contact] Resend error:", error);
       return NextResponse.json(
-        { error: "Couldn't send just now — please try again in a moment." },
+        { error: "Could not send just now. Please try again in a moment." },
         { status: 502 }
       );
     }
@@ -103,7 +103,7 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error("[contact] send failed:", err);
     return NextResponse.json(
-      { error: "Couldn't send just now — please try again in a moment." },
+      { error: "Could not send just now. Please try again in a moment." },
       { status: 502 }
     );
   }
