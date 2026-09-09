@@ -11,7 +11,147 @@
    Each theme redefines the SEMANTIC tokens (--color-ink, --color-canvas, and
    so on) so every existing utility follows it, then adds its own private
    --rt- and --wy- values for things with no Tailwind
-   namespace. */
+   namespace.
+
+   TOKEN blocks stay unlayered. COMPONENT classes do not, and the difference
+   matters: unlayered rules beat every layer, so an unlayered .st-key setting
+   display:inline-flex silently overrode Tailwind's md:hidden and left the
+   mobile menu button visible on desktop. Component classes therefore live in
+   @layer components, which utilities are allowed to override, exactly as they
+   would for any other component class. */
+
+/* ================================================================== */
+/*  studio - warm paper, pastel bento                                  */
+/* ================================================================== */
+[data-theme="studio"] {
+  --st-paper: #fdf9f3;
+  --st-ink: #2c3145;    /* 12.27:1 on paper, 9.7-11.5:1 on every card hue */
+  --st-ink-2: #5a6076;  /* 6.07:1 on paper, 4.8:1 on the darkest hue */
+
+  /* Card fill and its border.
+     "Adjacent cards must contrast" cannot be checked with WCAG ratios here:
+     every one of these sits at OKLCh lightness 0.91-0.95, so all 21 pairings
+     measure between 1.01 and 1.11:1. Luminance is the wrong axis. The rule
+     that does work is a hue-angle separation of at least 25 degrees between
+     neighbours, plus a border that clears 1.55:1 against the paper.
+     Every pair clears 25 degrees except peach/paper (13.4) and butter/paper
+     (16.1), which means those two cards are identified almost entirely by
+     their border, and butter's original #EBD98A measured only 1.35:1. Hence
+     the darker #DCC46A. That is the one value here that is not from the
+     reference. */
+  --st-mint: #d6efe0;    --st-mint-edge: #a8d6be;
+  --st-pink: #fbdde4;    --st-pink-edge: #f0aec0;
+  --st-lav: #e4ddf5;     --st-lav-edge: #bcaee4;
+  --st-peach: #fce3cc;   --st-peach-edge: #f2be8a;
+  --st-sky: #d8e8f7;     --st-sky-edge: #a6c9e8;
+  --st-butter: #fbf0c8;  --st-butter-edge: #dcc46a;
+
+  --color-canvas: var(--st-paper);
+  --color-surface: #ffffff;
+  --color-surface-2: var(--st-paper);
+  --color-hairline: #e4ddd2;
+  --color-ink: var(--st-ink);
+  --color-body: var(--st-ink);
+  --color-muted: var(--st-ink-2);
+  --color-faint: #7a8093;
+  --color-indigo: var(--st-ink);
+  --color-violet: var(--st-ink);
+  --color-deep-indigo: var(--st-ink);
+  --color-cyan: #3f7d5e;
+  --color-danger: #b23a48;
+
+  --grid-image: none;
+  --grid-size: 0 0;
+  --gradient-wordmark: none;
+  --shadow-card-hover: none;
+
+  --container-page: 1200px;
+  --scroll-pad: 5.5rem;
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+/* The CSS property beats the meta tag, and globals.css sets color-scheme:dark
+   on :root. Without this the native form controls, the scrollbar and Chrome's
+   autofill background all stay dark on a light page. */
+html:has([data-theme="studio"]) {
+  color-scheme: light;
+  background-color: #fdf9f3;
+}
+
+@layer components {
+/* One card, six hues. The fill and edge are set by a hue class so the card
+   itself never names a colour. */
+[data-theme="studio"] .st-card {
+  background: var(--card-fill, #fff);
+  border: 1.5px solid var(--card-edge, var(--color-hairline));
+  /* A printed edge, not a blur. Every surface in this theme uses this one
+     recipe, which is what stops six card types drifting into six shadows. */
+  box-shadow: 0 2px 0 0 var(--card-edge, var(--color-hairline));
+  border-radius: 22px;
+}
+
+[data-theme="studio"] .st-mint   { --card-fill: var(--st-mint);   --card-edge: var(--st-mint-edge); }
+[data-theme="studio"] .st-pink   { --card-fill: var(--st-pink);   --card-edge: var(--st-pink-edge); }
+[data-theme="studio"] .st-lav    { --card-fill: var(--st-lav);    --card-edge: var(--st-lav-edge); }
+[data-theme="studio"] .st-peach  { --card-fill: var(--st-peach);  --card-edge: var(--st-peach-edge); }
+[data-theme="studio"] .st-sky    { --card-fill: var(--st-sky);    --card-edge: var(--st-sky-edge); }
+[data-theme="studio"] .st-butter { --card-fill: var(--st-butter); --card-edge: var(--st-butter-edge); }
+[data-theme="studio"] .st-plain  { --card-fill: transparent;      --card-edge: var(--st-mint-edge); }
+
+/* Keycap. The asymmetric padding IS the key height: 2px more below than above
+   reads as depth without a gradient or a shadow blur. */
+[data-theme="studio"] .st-key {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  padding: 7px 10px 9px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1.5px solid var(--card-edge, var(--color-hairline));
+  box-shadow: 0 2px 0 0 var(--card-edge, var(--color-hairline));
+  color: var(--st-ink);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-theme="studio"] .st-key:hover {
+    transform: translateY(2px);
+    box-shadow: 0 0 0 0 var(--card-edge, var(--color-hairline));
+  }
+}
+
+/* The card's corner label. Present on every card, which is the repetition
+   element that ties the bento together. */
+[data-theme="studio"] .st-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--st-ink) 62%, transparent);
+}
+
+/* Sticker: one per card, bordered in that card's own hue so it reads as part
+   of the system rather than decoration applied on top of it. */
+[data-theme="studio"] .st-sticker {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  background: #fff;
+  border: 1.5px solid var(--card-edge, var(--color-hairline));
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--st-ink);
+}
+}
 
 /* ================================================================== */
 /*  retro - American screen-print poster                               */
@@ -82,6 +222,7 @@
   }
 }
 
+@layer components {
 [data-theme="retro"] .rt-grain::after {
   content: "";
   position: fixed;
@@ -167,4 +308,5 @@
 [data-theme="retro"] .rt-rule-link:hover,
 [data-theme="retro"] .rt-rule-link:focus-visible {
   background-size: 100% 3px;
+}
 }
