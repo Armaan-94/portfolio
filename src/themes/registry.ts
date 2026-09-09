@@ -39,6 +39,15 @@ export const THEMES: readonly ThemeMeta[] = [
     themeColor: "#0d1117",
   },
   {
+    id: "weyland",
+    label: "Weyland",
+    tagline: "Instrument panel, mint on black",
+    href: "/weyland",
+    swatch: ["#08110f", "#d9f2e6", "#e8b04b"],
+    scheme: "dark",
+    themeColor: "#08110f",
+  },
+  {
     id: "studio",
     label: "Studio",
     tagline: "Warm paper, pastel cards",
