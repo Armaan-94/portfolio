@@ -21,6 +21,250 @@
    would for any other component class. */
 
 /* ================================================================== */
+/*  manga - retro Japanese comic print                                 */
+/* ================================================================== */
+[data-theme="manga"] {
+  /* Two of these three inks were sampled from the reference prints rather than
+     chosen: the vermillion off the manga resume, the pine off the vintage
+     newspaper. The indigo is the one picked to join them, at hue 214deg, which
+     sits well clear of the red at 9deg and the green at 158deg, so the three
+     read as a real three-colour riso rather than as a muddle.
+
+     Measured on the cream:
+       pine     #123528  11.32:1  body text
+       indigo   #26456E   8.21:1  secondary text, links
+       deep red #B53722   5.02:1  red at body size, and cream reversed out of red
+       verm     #D4472F   3.74:1  LARGE display, fills and rules only */
+  --mg-paper: #f7ead9;
+  --mg-paper-2: #f1dfca;
+  --mg-pine: #123528;
+  --mg-verm: #d4472f;
+  --mg-verm-ink: #b53722;
+  --mg-indigo: #26456e;
+  --mg-tone: #e2a58f;
+
+  --color-canvas: var(--mg-paper);
+  --color-surface: #fdf6ec;
+  --color-surface-2: var(--mg-paper-2);
+  --color-hairline: #cbb79c;
+  --color-ink: var(--mg-pine);
+  --color-body: var(--mg-pine);
+  --color-muted: #4a5f52;
+  --color-faint: #6b7d70;
+  --color-indigo: var(--mg-indigo);
+  --color-violet: var(--mg-verm-ink);
+  --color-deep-indigo: var(--mg-verm);
+  --color-cyan: var(--mg-indigo);
+  --color-danger: var(--mg-verm-ink);
+
+  --grid-image: none;
+  --grid-size: 0 0;
+  --gradient-wordmark: none;
+  --shadow-card-hover: none;
+
+  --container-page: 1120px;
+  --scroll-pad: 4.75rem;
+
+  --font-sans: var(--font-zen-kaku), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-zen-kaku), ui-monospace, monospace;
+  --font-display: var(--font-zen-kaku), ui-sans-serif, sans-serif;
+  --font-mincho: var(--font-zen-mincho), Georgia, serif;
+}
+
+/* A light theme, so this has to override :root{color-scheme:dark} in
+   globals.css. The CSS property beats the meta tag, so the tag alone would
+   leave the form controls, scrollbar and autofill dark on cream paper. */
+html:has([data-theme="manga"]) {
+  color-scheme: light;
+  background-color: #f7ead9;
+}
+
+@layer components {
+  /* --- panels ---------------------------------------------------------- */
+
+  /* The double rule is the most characteristic thing in both references: a
+     heavy outer stroke with a hairline sitting just inside it. One border plus
+     one inset shadow, rather than two nested elements. */
+  [data-theme="manga"] .mg-panel {
+    border: 2.5px solid var(--mg-pine);
+    box-shadow:
+      inset 0 0 0 1px var(--mg-paper),
+      inset 0 0 0 3.5px var(--mg-pine);
+    background: var(--mg-paper);
+  }
+
+  [data-theme="manga"] .mg-panel-red {
+    border-color: var(--mg-verm);
+    box-shadow:
+      inset 0 0 0 1px var(--mg-paper),
+      inset 0 0 0 3.5px var(--mg-verm);
+  }
+
+  [data-theme="manga"] .mg-panel-blue {
+    border-color: var(--mg-indigo);
+    box-shadow:
+      inset 0 0 0 1px var(--mg-paper),
+      inset 0 0 0 3.5px var(--mg-indigo);
+  }
+
+  /* --- screentone ------------------------------------------------------ */
+
+  /* Halftone as a rotated dot lattice. Axis-aligned dots read as a CSS
+     pattern; rotated ones read as printed screentone, which is the whole
+     difference between a comic and a web page with dots on it. */
+  [data-theme="manga"] .mg-tone {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  [data-theme="manga"] .mg-tone::before {
+    content: "";
+    position: absolute;
+    inset: -50%;
+    background-image: radial-gradient(currentColor 1.1px, transparent 1.4px);
+    background-size: 5px 5px;
+    transform: rotate(22deg);
+    opacity: var(--mg-tone-opacity, 0.3);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* --- speed lines ----------------------------------------------------- */
+
+  /* Radiating focus lines, the way a manga panel points at its subject. One
+     repeating conic gradient does all of it, and the mask clears the middle so
+     the subject is not struck through by its own emphasis. */
+  [data-theme="manga"] .mg-burst {
+    position: relative;
+    isolation: isolate;
+    /* The rays are drawn oversized so they reach the corners, which means they
+       also reach past them. Without this they spill out of the panel and rake
+       across the page margin. */
+    overflow: hidden;
+  }
+  [data-theme="manga"] .mg-burst::before {
+    content: "";
+    position: absolute;
+    inset: -30%;
+    background: repeating-conic-gradient(
+      from 0deg at 50% 50%,
+      currentColor 0deg 0.55deg,
+      transparent 0.55deg 3.4deg
+    );
+    -webkit-mask-image: radial-gradient(
+      circle at 50% 50%,
+      transparent 34%,
+      #000 70%
+    );
+    mask-image: radial-gradient(circle at 50% 50%, transparent 34%, #000 70%);
+    opacity: var(--mg-burst-opacity, 0.26);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* --- type ------------------------------------------------------------ */
+
+  [data-theme="manga"] .mg-display {
+    font-family: var(--font-display);
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+
+  /* Two-pass misregistration, the way a cheap comic press never quite lines
+     its plates up. Masthead only: anywhere else it reads as a rendering fault
+     rather than as a press artefact. */
+  [data-theme="manga"] .mg-misprint {
+    text-shadow:
+      2px 2px 0 color-mix(in srgb, var(--mg-verm) 55%, transparent),
+      -1.5px -1px 0 color-mix(in srgb, var(--mg-indigo) 30%, transparent);
+  }
+
+  [data-theme="manga"] .mg-label {
+    font-family: var(--font-mincho);
+    font-size: 0.6875rem;
+    line-height: 1.3;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  /* --- devices --------------------------------------------------------- */
+
+  /* Notched banner, the "ALSO KNOWN AS" ribbon in the reference. */
+  [data-theme="manga"] .mg-ribbon {
+    clip-path: polygon(
+      0 0,
+      calc(100% - 14px) 0,
+      100% 50%,
+      calc(100% - 14px) 100%,
+      0 100%,
+      14px 50%
+    );
+  }
+
+  /* The circular overprint stamp in the corner of the reference. */
+  [data-theme="manga"] .mg-stamp {
+    display: grid;
+    place-items: center;
+    border: 2.5px solid currentColor;
+    border-radius: 9999px;
+    transform: rotate(-12deg);
+    font-family: var(--font-mincho);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.05;
+    text-align: center;
+  }
+
+  /* Checkbox, from the "IN 3 WORDS" row. */
+  [data-theme="manga"] .mg-check::before {
+    content: "\2713";
+    display: inline-grid;
+    place-items: center;
+    width: 1.15em;
+    height: 1.15em;
+    margin-inline-end: 0.5em;
+    border: 2px solid currentColor;
+    font-size: 0.82em;
+    line-height: 1;
+    vertical-align: -0.14em;
+  }
+
+  /* Paper grain: one fixed element, so it rasterises once and never repaints
+     on scroll. */
+  [data-theme="manga"] .mg-grain::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.05;
+    mix-blend-mode: multiply;
+  }
+}
+
+/* A filter attribute cannot be changed from CSS, so retina gets its own URI. */
+@media (min-resolution: 2dppx) {
+  [data-theme="manga"] .mg-grain::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* mix-blend-mode and masks are undefined under forced colours, so the purely
+   decorative layers are removed rather than left to render as solid blocks. */
+@media (forced-colors: active) {
+  [data-theme="manga"] .mg-tone::before,
+  [data-theme="manga"] .mg-burst::before,
+  [data-theme="manga"] .mg-grain::after {
+    display: none;
+  }
+}
+
+/* ================================================================== */
 /*  weyland - instrument panel                                         */
 /* ================================================================== */
 [data-theme="weyland"] {

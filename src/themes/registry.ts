@@ -10,7 +10,7 @@
  * else needs to know about it: the dial, the cookie validator and the rewrite
  * list all derive from this array.
  */
-export type ThemeId = "default" | "weyland" | "studio" | "retro";
+export type ThemeId = "default" | "weyland" | "studio" | "retro" | "manga";
 
 export type ThemeMeta = {
   id: ThemeId;
@@ -55,6 +55,15 @@ export const THEMES: readonly ThemeMeta[] = [
     swatch: ["#fdf9f3", "#2c3145", "#d6efe0"],
     scheme: "light",
     themeColor: "#fdf9f3",
+  },
+  {
+    id: "manga",
+    label: "Manga",
+    tagline: "Retro comic print, three inks on cream",
+    href: "/manga",
+    swatch: ["#f7ead9", "#d4472f", "#123528"],
+    scheme: "light",
+    themeColor: "#f7ead9",
   },
   {
     id: "retro",

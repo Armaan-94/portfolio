@@ -64,12 +64,11 @@ export function Portrait() {
     >
       <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border-[1.5px] border-[var(--card-edge)] bg-white">
         <Image
-          src="/ascii-source.jpg"
+          src="/portrait.jpg"
           alt={`${profile.name}, ${profile.title}`}
           fill
           sizes="(max-width: 1024px) 100vw, 20rem"
           className="object-cover"
-          style={{ objectPosition: "50% 22%" }}
         />
       </div>
     </BentoCard>

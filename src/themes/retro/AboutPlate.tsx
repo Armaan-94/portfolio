@@ -25,12 +25,12 @@ export function AboutPlate() {
                   crops: this one is framed as a portrait already, so it needs
                   no objectPosition hack to find the face. */}
               <Image
-                src="/ascii-source.jpg"
+                src="/portrait.jpg"
                 alt={`${profile.name}, ${profile.title}`}
                 fill
                 sizes="(max-width: 1024px) 100vw, 22rem"
                 className="object-cover mix-blend-multiply grayscale contrast-125"
-                style={{ objectPosition: "50% 22%", opacity: 0.92 }}
+                style={{ opacity: 0.92 }}
               />
               <div
                 aria-hidden

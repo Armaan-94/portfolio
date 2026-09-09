@@ -41,7 +41,7 @@ export const stats: { label: string; value: string }[] = [
   { label: "CGPA", value: "8.77" },
   { label: "Internships", value: "5" },
   { label: "Records processed", value: "160M+" },
-  { label: "Profitability lift", value: "~18%" },
+  { label: "Work experience", value: "1 year +" },
 ];
 
 export type Experience = {
@@ -60,7 +60,7 @@ export const experience: Experience[] = [
     location: "Gurugram",
     period: "Apr 2026 - Aug 2026",
     bullets: [
-      "Built an AI-powered business-intelligence and large-scale data-processing layer over 160M+ customer records, increasing profitability by 18% across the company’s financial services.",
+      "Built an AI-powered business-intelligence and large-scale data-processing layer over 160M+ customer records, lifting profitability across the company’s financial services.",
       "Designed and integrated scalable enterprise applications with Next.js, TypeScript, Python, DuckDB, and AI/ML workflows to automate data processing, analytics, and organization-wide insight sharing.",
       "Engineered CRM integrations consolidating multiple business services while streamlining digital marketing and operational workflows.",
       "Tested, optimized, and documented AI-powered Voice, SMS, Email, and WhatsApp communication modules, and wrote the technical training resources for AI automation agents.",
