@@ -66,10 +66,10 @@ const HEADROOM = num("ASCII_HEADROOM", 0);
  * source uses BG_MODE=mask instead of the flood fill.
  */
 const CROP = {
-  x: num("ASCII_X", 0.44),
-  y: num("ASCII_Y", 0.18),
-  w: num("ASCII_W", 0.49),
-  h: num("ASCII_H", 0.82),
+  x: num("ASCII_X", 0.38),
+  y: num("ASCII_Y", 0.2),
+  w: num("ASCII_W", 0.58),
+  h: num("ASCII_H", 0.78),
 };
 
 /**
@@ -81,7 +81,7 @@ const CROP = {
  * which puts the head at roughly 32 rows: about the point where a face stops
  * being "a face" and starts being this specific person.
  */
-const ASPECT = num("ASCII_ASPECT", 0.6);
+const ASPECT = num("ASCII_ASPECT", 0.744);
 const TIERS = [
   { key: "wide", cols: 72 },
   { key: "narrow", cols: 52 },
@@ -111,7 +111,7 @@ const MASK = {
   // Off-centre and generous. The head fills this crop and runs off two edges,
   // so a tight ellipse clips the face; what actually needs removing is the
   // stand of trees down the right side and the corners.
-  cx: num("ASCII_MASK_CX", 0.45),
+  cx: num("ASCII_MASK_CX", 0.54),
   cy: num("ASCII_MASK_CY", 0.52),
   rx: num("ASCII_MASK_RX", 0.62),
   ry: num("ASCII_MASK_RY", 0.6),
