@@ -21,13 +21,16 @@ export function AboutPlate() {
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-14">
           <figure className="lg:col-span-4">
             <div className="relative aspect-[4/5] overflow-hidden rounded-[20px] border-[12px] border-[var(--rt-cream)] bg-[var(--rt-brick)]">
+              {/* The headshot, not the award-stage photo the default theme
+                  crops: this one is framed as a portrait already, so it needs
+                  no objectPosition hack to find the face. */}
               <Image
-                src="/armaan.jpg"
+                src="/ascii-source.jpg"
                 alt={`${profile.name}, ${profile.title}`}
                 fill
                 sizes="(max-width: 1024px) 100vw, 22rem"
                 className="object-cover mix-blend-multiply grayscale contrast-125"
-                style={{ objectPosition: "64% 20%", opacity: 0.92 }}
+                style={{ objectPosition: "50% 22%", opacity: 0.92 }}
               />
               <div
                 aria-hidden

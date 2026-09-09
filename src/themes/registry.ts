@@ -41,7 +41,7 @@ export const THEMES: readonly ThemeMeta[] = [
   {
     id: "retro",
     label: "Retro",
-    tagline: "American screen print, cream on charcoal",
+    tagline: "Cream and brick on charcoal",
     href: "/retro",
     swatch: ["#1a1a1a", "#dcc9a9", "#b83a2d"],
     scheme: "dark",
