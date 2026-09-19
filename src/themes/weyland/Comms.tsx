@@ -1,6 +1,7 @@
 "use client";
 
 import { profile } from "@/content";
+import { ViewCount } from "@/components/shared/ViewCount";
 import { useContactForm } from "@/lib/useContactForm";
 
 export function Comms() {
@@ -209,6 +210,7 @@ export function WeylandFooter() {
         (C) {new Date().getFullYear()} A. Punia / no warranty expressed or
         implied
       </p>
+      <ViewCount className="text-[var(--wy-ink)]" />
     </footer>
   );
 }

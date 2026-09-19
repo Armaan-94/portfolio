@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from "react";
 import { profile } from "@/content";
+import { ViewCount } from "@/components/shared/ViewCount";
 import { useContactForm } from "@/lib/useContactForm";
 import { Panel, Stamp } from "./Panels";
 
@@ -208,6 +209,7 @@ export function MangaFooter() {
           &copy; {new Date().getFullYear()} &middot; Open to software
           engineering roles
         </p>
+        <ViewCount className="mg-label text-[var(--mg-verm-ink)]" />
         <a
           href="#hero"
           className="mg-label border-b-[2px] border-[var(--mg-verm)] pb-0.5 text-[var(--mg-pine)]"

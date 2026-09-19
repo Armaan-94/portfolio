@@ -13,7 +13,6 @@ import {
   OrbitDiagram,
   ProjectDisc,
   SignalTrace,
-  CATEGORY_LEGEND,
 } from "./Instruments";
 
 /** Every section is a module in one continuous frame, marked off by a rule. */
@@ -321,14 +320,6 @@ export function Catalogue() {
         ))}
       </ol>
 
-      <dl className="wy-micro mt-9 flex flex-wrap gap-x-6 gap-y-2 border-t border-[var(--wy-line)] pt-4">
-        {CATEGORY_LEGEND.map(([cat, glyph]) => (
-          <div key={cat} className="flex items-center gap-2">
-            <dt className="text-[var(--wy-ink)]">{glyph}</dt>
-            <dd>{cat}</dd>
-          </div>
-        ))}
-      </dl>
     </Panel>
   );
 }

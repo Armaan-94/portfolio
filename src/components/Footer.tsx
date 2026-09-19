@@ -1,4 +1,5 @@
 import { profile } from "@/content";
+import { ViewCount } from "@/components/shared/ViewCount";
 import { GitHubIcon, LinkedInIcon, LeetCodeIcon, ArrowUpIcon } from "./Icons";
 
 export function Footer() {
@@ -11,6 +12,7 @@ export function Footer() {
           <p className="mt-1 font-mono text-xs text-muted">
             © {year} · Open to software engineering roles
           </p>
+          <ViewCount className="mt-1 block font-mono text-xs text-faint" />
         </div>
 
         <div className="flex items-center gap-2">

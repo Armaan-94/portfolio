@@ -2,15 +2,21 @@
  * The themes a visitor can choose between.
  *
  * Each theme is a full remodel rather than a recolour, so each is its own
- * statically prerendered route. The cookie-conditioned rewrite in
- * next.config.ts resolves "/" to the remembered one, which keeps the URL clean
- * without giving up the CDN-served static page.
+ * statically prerendered route, served static off the CDN.
+ *
+ * "/" is ALWAYS the default theme. An earlier build resolved "/" to whichever
+ * theme a cookie remembered, which meant a return visit opened on whatever was
+ * picked last rather than on the front door. Choosing a theme now simply
+ * navigates to its route, so the address bar always says which one you are
+ * looking at and "/" is never a surprise.
+ *
+ * Order here is the order in the switcher.
  *
  * Adding a theme means adding an entry here and an app/<id>/page.tsx. Nothing
- * else needs to know about it: the dial, the cookie validator and the rewrite
- * list all derive from this array.
+ * else needs to know about it: the switcher and the cookie validator both
+ * derive from this array.
  */
-export type ThemeId = "default" | "weyland" | "studio" | "retro" | "manga";
+export type ThemeId = "default" | "manga" | "weyland" | "retro";
 
 export type ThemeMeta = {
   id: ThemeId;
@@ -39,24 +45,6 @@ export const THEMES: readonly ThemeMeta[] = [
     themeColor: "#0d1117",
   },
   {
-    id: "weyland",
-    label: "Weyland",
-    tagline: "Instrument panel, mint on black",
-    href: "/weyland",
-    swatch: ["#08110f", "#d9f2e6", "#e8b04b"],
-    scheme: "dark",
-    themeColor: "#08110f",
-  },
-  {
-    id: "studio",
-    label: "Studio",
-    tagline: "Warm paper, pastel cards",
-    href: "/studio",
-    swatch: ["#fdf9f3", "#2c3145", "#d6efe0"],
-    scheme: "light",
-    themeColor: "#fdf9f3",
-  },
-  {
     id: "manga",
     label: "Manga",
     tagline: "Retro comic print, three inks on cream",
@@ -64,6 +52,15 @@ export const THEMES: readonly ThemeMeta[] = [
     swatch: ["#f7ead9", "#d4472f", "#123528"],
     scheme: "light",
     themeColor: "#f7ead9",
+  },
+  {
+    id: "weyland",
+    label: "Weyland",
+    tagline: "Instrument panel, mint on black",
+    href: "/weyland",
+    swatch: ["#08110f", "#d9f2e6", "#e8b04b"],
+    scheme: "dark",
+    themeColor: "#08110f",
   },
   {
     id: "retro",
@@ -82,9 +79,8 @@ const BY_ID = new Map(THEMES.map((t) => [t.id, t]));
 
 /**
  * Narrows an untrusted string (a cookie value, a query param) to a theme that
- * actually exists. Deliberately checks THEMES rather than the ThemeId union:
- * the union names themes that are planned, and rewriting "/" to a route that
- * has not shipped yet would 404.
+ * actually exists. Deliberately checks THEMES rather than the ThemeId union,
+ * so a value that names a theme which has not shipped is still rejected.
  */
 export function isThemeId(value: unknown): value is ThemeId {
   return typeof value === "string" && BY_ID.has(value as ThemeId);
@@ -93,10 +89,5 @@ export function isThemeId(value: unknown): value is ThemeId {
 export function themeMeta(id: ThemeId): ThemeMeta {
   return BY_ID.get(id) ?? BY_ID.get(DEFAULT_THEME)!;
 }
-
-/** Theme ids that need a cookie rewrite, i.e. everything but the default. */
-export const REWRITABLE_THEMES = THEMES.filter((t) => t.id !== DEFAULT_THEME).map(
-  (t) => t.id
-);
 
 export const THEME_COOKIE = "theme";

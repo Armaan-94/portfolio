@@ -4,7 +4,7 @@ import { MangaLayout } from "@/themes/manga/Layout";
 import { mangaFontVars } from "@/themes/manga/fonts";
 
 /**
- * Static route for the manga theme. Light, like studio, so colorScheme is set
+ * Static route for the manga theme. A light theme, so colorScheme is set
  * here and reinforced by the html:has() rule in themes.css: the CSS property
  * beats this tag, and globals.css sets dark on :root.
  */

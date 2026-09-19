@@ -1,78 +1,43 @@
 import { experience, projects } from "@/content";
+import { ICON_COLS, ICON_ROWS, PROJECT_ICONS } from "./project-icons";
 
 /* ------------------------------------------------------------------ */
-/*  Dithered celestial bodies                                          */
+/*  Project schematics                                                 */
 /* ------------------------------------------------------------------ */
 
 /**
- * Ordered dithering, done where it actually belongs.
+ * A wireframe per project, from ./project-icons.
  *
- * Bayer is wrong for the portrait: a cheek spans about three ramp steps across
- * twenty columns, and a 4x4 pattern injects noise at exactly the spatial
- * frequency of the features it would destroy. A lit sphere is the opposite
- * case, a smooth analytic gradient with no detail to protect, which is
- * precisely what ordered dithering is for.
+ * These were dithered spheres: Bayer-ordered Lambert shading, radius from the
+ * stack depth, glyph from the category. It was a pretty piece of signal
+ * processing that carried almost no information. Every project got a ball, and
+ * two projects with the same category and stack size got the *same* ball, so
+ * the strip read as decoration. Each project now gets a schematic of what it
+ * actually is, which is both legible at a glance and closer to the language
+ * the rest of this theme speaks.
  *
- * These are computed once at module scope, so seven discs cost 2,352 static
- * characters and nothing at all at runtime.
+ * A project with no bespoke icon falls back to a labelled empty frame rather
+ * than throwing, so adding one to content.ts can never break the build.
  */
-const BAYER4 = [
-  [0, 8, 2, 10],
-  [12, 4, 14, 6],
-  [3, 11, 1, 9],
-  [15, 7, 13, 5],
-].map((row) => row.map((v) => (v + 0.5) / 16));
-
-const DISC_COLS = 24;
-// A monospace cell is 0.6em wide by 1em tall, so a round disc needs roughly
-// 0.6 as many rows as columns. 24 x 14 reads as a circle; 24 x 24 would be an
-// egg standing on end.
-const DISC_ROWS = 14;
-
-function renderDisc(radius: number, glyph: string): string[] {
-  const out: string[] = [];
-  for (let y = 0; y < DISC_ROWS; y++) {
-    let line = "";
-    for (let x = 0; x < DISC_COLS; x++) {
-      const nx = (((x + 0.5) / DISC_COLS) * 2 - 1) / radius;
-      const ny = (((y + 0.5) / DISC_ROWS) * 2 - 1) / radius;
-      const r2 = nx * nx + ny * ny;
-      if (r2 > 1) {
-        line += " ";
-        continue;
-      }
-      // Lambert for a sphere lit from the upper left, in front, plus an
-      // ambient floor. With no ambient the unlit hemisphere empties out
-      // completely and the body stops reading as a sphere at all: it becomes a
-      // scatter of dots with no silhouette. 0.22 keeps the dark side present.
-      const nz = Math.sqrt(1 - r2);
-      const lambert = Math.max(0, -0.48 * nx - 0.58 * ny + 0.66 * nz);
-      const lit = 0.22 + 0.78 * lambert;
-      line += lit ** 0.7 > BAYER4[y % 4][x % 4] ? glyph : " ";
+function fallbackIcon(title: string): string[] {
+  const rows: string[] = [];
+  const label = title.slice(0, ICON_COLS - 4).toUpperCase();
+  for (let y = 0; y < ICON_ROWS; y++) {
+    if (y === 0 || y === ICON_ROWS - 1) {
+      rows.push("+" + "-".repeat(ICON_COLS - 2) + "+");
+    } else if (y === Math.floor(ICON_ROWS / 2)) {
+      const pad = ICON_COLS - 2 - label.length;
+      const left = Math.floor(pad / 2);
+      rows.push("|" + " ".repeat(left) + label + " ".repeat(pad - left) + "|");
+    } else {
+      rows.push("|" + " ".repeat(ICON_COLS - 2) + "|");
     }
-    out.push(line);
   }
-  return out;
+  return rows;
 }
 
-/** Category picks the glyph, so the legend below the strip actually decodes. */
-const CATEGORY_GLYPH: Record<string, string> = {
-  Backend: "#",
-  "AI/ML": "*",
-  "Full-stack": "%",
-  Algorithms: "=",
-  Web: ":",
-  Frontend: "-",
-};
-
-/** Stack depth picks the radius: a bigger system is a bigger body. */
-function radiusFor(stackLength: number) {
-  const t = Math.min(1, Math.max(0, (stackLength - 3) / 3));
-  return 0.62 + t * 0.38;
-}
-
-const DISCS = projects.map((p) =>
-  renderDisc(radiusFor(p.stack.length), CATEGORY_GLYPH[p.category] ?? "+")
+const ICONS = projects.map(
+  (p) => PROJECT_ICONS[p.title] ?? fallbackIcon(p.title),
 );
 
 export function ProjectDisc({ index }: { index: number }) {
@@ -82,12 +47,10 @@ export function ProjectDisc({ index }: { index: number }) {
       className="wy-ascii !text-[0.7rem] leading-[1.05] sm:!text-[0.8rem]"
       style={{ contain: "content" }}
     >
-      {DISCS[index].join("\n")}
+      {ICONS[index].join("\n")}
     </pre>
   );
 }
-
-export const CATEGORY_LEGEND = Object.entries(CATEGORY_GLYPH);
 
 /* ------------------------------------------------------------------ */
 /*  Career orbital diagram                                             */
