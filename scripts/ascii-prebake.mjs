@@ -23,6 +23,7 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import { buildMatte } from "./subject-matte.mjs";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const SRC = `${ROOT}${process.env.ASCII_SRC ?? "assets/portrait-source.jpg"}`;
@@ -58,18 +59,28 @@ const HEADROOM = num("ASCII_HEADROOM", 0);
  * Read off a coordinate grid rendered over the source rather than guessed.
  *
  * This is a close outdoor selfie, not a studio headshot, and the difference
- * drives every value here. The head runs off both the right and the bottom
- * edge, so there is no complete head to frame: the crop takes what exists,
- * x 0.44 to 0.93 and y 0.18 down, and the block aspect follows the crop rather
- * than the reverse, so nothing is squashed. The trees are as bright as the face
- * and are not connected to the frame edge in any useful way, which is why this
- * source uses BG_MODE=mask instead of the flood fill.
+ * drives every value here. The head runs off the bottom edge, so there is no
+ * complete head to frame: the crop takes what exists and the block aspect
+ * follows the crop rather than the reverse, so nothing is squashed. The trees
+ * are as bright as the face and are not connected to the frame edge in any
+ * useful way, which is why this source cannot use the flood fill.
+ *
+ * The box is drawn around the authored silhouette in scripts/subject-matte.mjs.
+ * It stops just below the chin: carried to the frame edge the jaw narrows into
+ * the collar fast enough to taper the neck to a point.
+ *
+ * Its width is then set by the panel, not by the head. Because the block is
+ * sized as font-size = 100cqw / (cols * 0.6), the rendered height is
+ * rows/(cols*0.6) times the panel width, so cropping tight to a head that is
+ * twice as tall as it is wide makes the panel 800px tall. Widening the box to
+ * a 0.744 aspect puts the head at about three quarters of the width and brings
+ * the block back to 58 rows.
  */
 const CROP = {
-  x: num("ASCII_X", 0.38),
-  y: num("ASCII_Y", 0.2),
-  w: num("ASCII_W", 0.58),
-  h: num("ASCII_H", 0.78),
+  x: num("ASCII_X", 0.421),
+  y: num("ASCII_Y", 0.175),
+  w: num("ASCII_W", 0.558),
+  h: num("ASCII_H", 0.75),
 };
 
 /**
@@ -77,9 +88,11 @@ const CROP = {
  *
  * A monospace advance is 0.6em and, at line-height 1, a cell is 0.6em wide by
  * 1em tall. So block width is cols * 0.6 and block height is rows, giving
- * rows = cols * 0.6 / ASPECT. At 72 columns and a 4:5 block that is 54 rows,
- * which puts the head at roughly 32 rows: about the point where a face stops
- * being "a face" and starts being this specific person.
+ * rows = cols * 0.6 / ASPECT. Both tiers must share this ratio, or switching
+ * between them at the 640px breakpoint would resize the panel. At 72 columns
+ * that is 58 rows, which puts the head at roughly 55 of them: well past the
+ * ~30 where a face stops being "a face" and starts being this specific
+ * person.
  */
 const ASPECT = num("ASCII_ASPECT", 0.744);
 const TIERS = [
@@ -102,9 +115,13 @@ const EDGE_THRESHOLD = num("ASCII_EDGE", 0.42);
  *             textured as the face and there is simply nothing for a flood fill
  *             to grab: without separation, keying by lightness removes parts of
  *             the face and keeps parts of the trees.
+ *   subject   Keep a hand-authored silhouette of the head and shoulders and
+ *             discard everything else. Correct for THIS photo: see
+ *             scripts/subject-matte.mjs for the four automatic cues that were
+ *             measured and rejected before falling back to an authored matte.
  *   none      Leave the frame alone.
  */
-const BG_MODE = process.env.ASCII_BG_MODE ?? "mask";
+const BG_MODE = process.env.ASCII_BG_MODE ?? "subject";
 
 /** Ellipse for BG_MODE=mask, as fractions of the cropped frame. */
 const MASK = {
@@ -125,6 +142,9 @@ const BG_LIGHTNESS = num("ASCII_BG", 0.82);
 /** How far below the fill threshold a backdrop-adjacent cell may sit and still
  *  count as halo rather than subject. */
 const HALO_TOLERANCE = num("ASCII_HALO", 0.35);
+/** Matte coverage at or above which a cell, and its neighbours, are excluded
+ *  from the edge pass. */
+const EDGE_MATTE_GUARD = num("ASCII_EDGE_GUARD", 0.02);
 
 /* --------------------------------------------------------------- pipeline -- */
 
@@ -238,7 +258,13 @@ function clampCrop(rw, rh) {
   const top = Math.max(0, Math.min(rh - 1, Math.round(CROP.y * rh)));
   const width = Math.max(1, Math.min(rw - left, Math.round(CROP.w * rw)));
   const height = Math.max(1, Math.min(rh - top, Math.round(CROP.h * rh)));
-  return { left, top, width, height };
+  // fx0/fy0/fw/fh are the fractions actually used after clamping, which is what
+  // the subject matte needs to place a sample back in the source frame. Reading
+  // CROP directly there would drift whenever the clamp bites.
+  return {
+    left, top, width, height,
+    fx0: left / rw, fy0: top / rh, fw: width / rw, fh: height / rh,
+  };
 }
 
 async function sampleTier(cols) {
@@ -265,11 +291,13 @@ async function sampleTier(cols) {
   const rw = meta.width;
   const rh = meta.height + pad;
 
+  const crop = clampCrop(rw, rh);
+
   const data = await pipeline
     // Clamped to the frame. An out-of-bounds crop makes sharp throw
     // "bad extract area", which is a needlessly cryptic way to learn that
     // x + w drifted past 1.
-    .extract(clampCrop(rw, rh))
+    .extract(crop)
     // lanczos3 rather than the box filter a canvas drawImage would use: at an
     // 4:1 reduction a box filter visibly smears the eyes and mouth together.
     .resize(cols, rows, { fit: "fill", kernel: "lanczos3" })
@@ -289,6 +317,8 @@ async function sampleTier(cols) {
     bg = backdropMask(raw, cols, rows);
   } else if (BG_MODE === "mask") {
     bg = ellipseMask(cols, rows);
+  } else if (BG_MODE === "subject") {
+    bg = await buildMatte({ sharp, src: padded, crop, cols, rows });
   } else {
     bg = new Uint8Array(cols * rows);
   }
@@ -302,15 +332,19 @@ async function sampleTier(cols) {
   const hi = subject[Math.floor(subject.length * 0.98)] ?? 1;
   const span = Math.max(hi - lo, 1e-3);
 
+  // Two tone buffers on purpose. `lit` is the image with no matte applied, and
+  // is what the Sobel reads; `tone` is what gets drawn. Running the Sobel on
+  // the matted tone instead would make the cut-out silhouette the strongest
+  // edge in the frame, which both draws a ring of / \ | glyphs around the head
+  // and, because `peak` normalises against it, washes out the glasses, the
+  // nose and the jawline that the edge pass exists to catch.
+  const lit = new Float32Array(n);
   const tone = new Float32Array(n);
   for (let i = 0; i < n; i++) {
-    if (bg[i] >= 1) {
-      tone[i] = 0;
-      continue;
-    }
     let t = Math.min(1, Math.max(0, (raw[i] - lo) / span));
     t = Math.min(1, Math.max(0, 0.5 + (t - 0.5) * CONTRAST));
-    tone[i] = (t ** (1 / GAMMA)) * (1 - bg[i]);
+    lit[i] = t ** (1 / GAMMA);
+    tone[i] = bg[i] >= 1 ? 0 : lit[i] * (1 - bg[i]);
   }
 
   // Sobel. Border cells stay at zero rather than producing a bright ring
@@ -321,11 +355,19 @@ async function sampleTier(cols) {
   for (let y = 1; y < rows - 1; y++) {
     for (let x = 1; x < cols - 1; x++) {
       const i = y * cols + x;
-      const tl = tone[i - cols - 1], tc = tone[i - cols], tr = tone[i - cols + 1];
-      const ml = tone[i - 1], mr = tone[i + 1];
-      const bl = tone[i + cols - 1], bc = tone[i + cols], br = tone[i + cols + 1];
+      const tl = lit[i - cols - 1], tc = lit[i - cols], tr = lit[i - cols + 1];
+      const ml = lit[i - 1], mr = lit[i + 1];
+      const bl = lit[i + cols - 1], bc = lit[i + cols], br = lit[i + cols + 1];
       const gx = tl + 2 * ml + bl - tr - 2 * mr - br;
       const gy = tl + 2 * tc + tr - bl - 2 * bc - br;
+      // A cell that touches the matte edge is discarded: its Sobel describes
+      // where the cut-out runs, not where the face does.
+      let clear = true;
+      for (let dy = -1; dy <= 1 && clear; dy++)
+        for (let dx = -1; dx <= 1; dx++)
+          if (bg[i + dy * cols + dx] > EDGE_MATTE_GUARD) { clear = false; break; }
+      if (!clear) continue;
+
       const m = Math.hypot(gx, gy);
       if (m > peak) peak = m;
       mag[i] = m;

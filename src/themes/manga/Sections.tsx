@@ -66,17 +66,21 @@ export function Masthead() {
             Also known as
           </Ribbon>
           <div
-            className="mg-burst mt-9 grid items-center gap-6 text-[var(--mg-verm)] sm:grid-cols-[13rem_1fr]"
+            className="mg-burst mt-9 grid items-center gap-6 text-[var(--mg-verm)] sm:grid-cols-[15rem_1fr]"
             style={{ "--mg-burst-opacity": 0.22 } as CSSProperties}
           >
-            <Tone tone={0.34} ink="red" className="mx-auto w-full max-w-[13rem]">
-              <div className="relative aspect-square overflow-hidden rounded-full border-[3px] border-[var(--mg-pine)]">
+            {/* A drawn panel rather than an avatar: the portrait is inked to
+                a single colour with a transparent ground, so the red
+                screentone behind it reads through the paper areas the way a
+                tone sheet laid under a drawing does. */}
+            <Tone tone={0.34} ink="red" className="mx-auto w-full max-w-[15rem]">
+              <div className="relative aspect-[4/5] overflow-hidden border-[3px] border-[var(--mg-pine)]">
                 <Image
-                  src="/portrait.jpg"
+                  src="/manga-portrait.png"
                   alt={`${profile.name}, ${profile.title}`}
                   fill
-                  sizes="13rem"
-                  className="object-cover contrast-125 grayscale"
+                  sizes="15rem"
+                  className="object-cover object-top"
                 />
               </div>
             </Tone>
