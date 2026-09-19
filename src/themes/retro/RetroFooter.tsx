@@ -1,4 +1,5 @@
 import { profile } from "@/content";
+import { ViewCount } from "@/components/shared/ViewCount";
 
 /** A colophon, which is what the back of a printed piece actually carries. */
 export function RetroFooter() {
@@ -12,6 +13,7 @@ export function RetroFooter() {
           &copy; {new Date().getFullYear()} &middot; Open to software
           engineering roles
         </p>
+        <ViewCount className="rt-caption text-[var(--rt-brick-txt)]" />
         <a
           href="#hero"
           className="rt-rule-link rt-caption pb-0.5 text-[var(--rt-cream)]"

@@ -2,31 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { THEMES, THEME_COOKIE, type ThemeId } from "@/themes/registry";
+import { THEMES, type ThemeId } from "@/themes/registry";
 
 const VEIL_MS = 220;
 
-function writeThemeCookie(id: ThemeId) {
-  document.cookie = `${THEME_COOKIE}=${id};path=/;max-age=31536000;samesite=lax`;
-}
-
-/** Cookie for the server, localStorage as a durable mirror, sessionStorage as
- *  a one-shot handoff so the next document knows to fade itself up. */
-function persistTheme(id: ThemeId) {
-  writeThemeCookie(id);
+/**
+ * A one-shot handoff so the next document knows to fade itself up.
+ *
+ * This is the only thing the switcher stores. The theme itself is not
+ * remembered anywhere: "/" is always the default theme, and a theme is a URL.
+ */
+function markEntering(id: ThemeId) {
   try {
-    localStorage.setItem(THEME_COOKIE, id);
     sessionStorage.setItem("theme:entering", id);
   } catch {
-    // Private mode or storage disabled. The cookie alone is enough.
-  }
-}
-
-function savedTheme(): string | null {
-  try {
-    return localStorage.getItem(THEME_COOKIE);
-  } catch {
-    return null;
+    // Private mode or storage disabled. The page just appears without the fade.
   }
 }
 
@@ -49,15 +39,6 @@ export function ThemeDial({ current }: { current: ThemeId }) {
   const [leaving, setLeaving] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  // Re-assert the cookie from localStorage, covering the case where the cookie
-  // was evicted but the visitor's choice is still known.
-  useEffect(() => {
-    const saved = savedTheme();
-    if (saved && saved !== current && THEMES.some((t) => t.id === saved)) {
-      writeThemeCookie(saved as ThemeId);
-    }
-  }, [current]);
-
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -74,7 +55,7 @@ export function ThemeDial({ current }: { current: ThemeId }) {
     };
   }, [open]);
 
-  function pick(e: React.MouseEvent<HTMLAnchorElement>, id: ThemeId) {
+  function pick(e: React.MouseEvent<HTMLAnchorElement>, id: ThemeId, href: string) {
     // Modified clicks belong to the browser.
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) {
       return;
@@ -85,24 +66,12 @@ export function ThemeDial({ current }: { current: ThemeId }) {
       return;
     }
 
-    persistTheme(id);
-    void fetch("/api/theme", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ theme: id }),
-      keepalive: true,
-    });
-
+    markEntering(id);
     setLeaving(true);
-    // Always "/" rather than the theme route. The rewrite in next.config.ts
-    // resolves it from the cookie we just set, so the address bar keeps a
-    // clean URL while the visitor still lands on their theme. The anchor href
-    // stays pointed at the real route, which is what keeps middle-click,
-    // open-in-new-tab and no-JS working.
-    window.setTimeout(() => {
-      if (window.location.pathname === "/") window.location.reload();
-      else window.location.assign("/");
-    }, VEIL_MS);
+    // Straight to the theme's own route, which is the same URL the anchor
+    // already points at. The address bar therefore always names the theme on
+    // screen, and "/" is only ever the default.
+    window.setTimeout(() => window.location.assign(href), VEIL_MS);
   }
 
   const veil =
@@ -144,7 +113,7 @@ export function ThemeDial({ current }: { current: ThemeId }) {
                   <li key={t.id}>
                     <a
                       href={t.href}
-                      onClick={(e) => pick(e, t.id)}
+                      onClick={(e) => pick(e, t.id, t.href)}
                       aria-current={isCurrent ? "true" : undefined}
                       className={`flex items-center gap-3 px-3.5 py-2.5 transition-colors ${
                         isCurrent ? "bg-surface-2" : "hover:bg-surface-2"
