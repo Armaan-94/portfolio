@@ -8,7 +8,7 @@ import {
   Signal,
 } from "./Sections";
 import { Comms, WeylandFooter } from "./Comms";
-import { ThemeDial } from "@/components/shared/ThemeDial";
+import { ThemePeel } from "@/components/shared/ThemePeel";
 
 /**
  * One continuous instrument, scrolled.
@@ -39,7 +39,7 @@ export function WeylandLayout() {
         <Comms />
         <WeylandFooter />
       </main>
-      <ThemeDial current="weyland" />
+      <ThemePeel current="weyland" />
     </div>
   );
 }
