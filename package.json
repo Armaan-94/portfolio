@@ -12,7 +12,8 @@
     "format:check": "prettier --check .",
     "ascii": "node scripts/ascii-prebake.mjs",
     "gen:image": "node scripts/gen-image.mjs",
-    "portrait": "node scripts/prepare-portrait.mjs"
+    "portrait": "node scripts/prepare-portrait.mjs",
+    "manga": "node scripts/manga-portrait.mjs"
   },
   "engines": {
     "node": ">=20"
