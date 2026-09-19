@@ -69,6 +69,9 @@ const HEADROOM = num("ASCII_HEADROOM", 0);
  * It stops just below the chin: carried to the frame edge the jaw narrows into
  * the collar fast enough to taper the neck to a point.
  *
+ * It takes in the shoulders, not just the head. Ending at the collar left the
+ * jaw tapering into nothing at the bottom edge, which read as unfinished.
+ *
  * Its width is then set by the panel, not by the head. Because the block is
  * sized as font-size = 100cqw / (cols * 0.6), the rendered height is
  * rows/(cols*0.6) times the panel width, so cropping tight to a head that is
@@ -77,10 +80,10 @@ const HEADROOM = num("ASCII_HEADROOM", 0);
  * the block back to 58 rows.
  */
 const CROP = {
-  x: num("ASCII_X", 0.421),
-  y: num("ASCII_Y", 0.175),
-  w: num("ASCII_W", 0.558),
-  h: num("ASCII_H", 0.75),
+  x: num("ASCII_X", 0.356),
+  y: num("ASCII_Y", 0.135),
+  w: num("ASCII_W", 0.644),
+  h: num("ASCII_H", 0.865),
 };
 
 /**

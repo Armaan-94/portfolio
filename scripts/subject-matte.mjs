@@ -18,20 +18,37 @@
  * is used only *inside* it, to carry the fine detail along the hairline that a
  * polygon cannot describe. One fixed photo, one fixed matte.
  *
- * It follows the head and the neck and stops at the collar. The navy shirt and
- * the bag strap are excluded deliberately: the brief is the face, and in ASCII
- * a dark shoulder mass is a slab of low-density glyphs that reads as noise.
+ * It follows the head, the neck AND the shoulders.
+ *
+ * Every vertex is MEASURED, not eyeballed. Two earlier versions were placed by
+ * eye against a view of the whole 460px frame, where the head is small, and
+ * both were badly too tight: the last one captured 0.416 of frame width when
+ * the head is really 0.575 wide, so it sliced the crown flat, cut the hair off
+ * down the right in a straight vertical line, and shaved the left cheek. The
+ * result was a head squeezed into a narrow oval, which is what read as
+ * "elongated" - the portrait was not stretched, it was clipped. These points
+ * come off a grid drawn over the crop at working size, in source fractions.
+ *
+ * An earlier version stopped at the collar, on the theory that the brief was
+ * the face. Two things were wrong with that. It clipped the hair down the
+ * right side, which made the head render at 0.52 wide for its height when a
+ * real head is nearer 0.70, so the portrait read as stretched. And ending at
+ * the collar left the jaw narrowing into nothing, so the frame finished on a
+ * taper rather than resolving: a head on a spike. Carrying the mask out to the
+ * shoulders gives the composition a base, and the shirt is dark, so in a
+ * light-on-dark render it is quiet rather than noisy.
  *
  * Coordinates are fractions of the source frame, clockwise from the crown.
  */
 export const SILHOUETTE = [
-  [0.670, 0.222], [0.762, 0.198], [0.845, 0.234], [0.872, 0.272],
-  [0.892, 0.350], [0.908, 0.450], [0.900, 0.558], [0.884, 0.638],
-  [0.868, 0.700], [0.845, 0.775], [0.812, 0.835], [0.780, 0.890],
-  [0.752, 0.950], [0.738, 1.000], [0.592, 1.000], [0.568, 0.950],
-  [0.542, 0.900], [0.515, 0.850], [0.498, 0.780], [0.492, 0.700],
-  [0.497, 0.620], [0.516, 0.550], [0.536, 0.500], [0.560, 0.450],
-  [0.576, 0.400], [0.594, 0.350], [0.620, 0.300], [0.640, 0.260],
+  [0.756, 0.172], [0.821, 0.190], [0.886, 0.228], [0.938, 0.278],
+  [0.950, 0.344], [0.964, 0.410], [0.966, 0.476], [0.955, 0.542],
+  [0.930, 0.606], [0.905, 0.672], [0.879, 0.738], [0.853, 0.802],
+  [0.834, 0.868], [0.847, 0.934], [0.886, 1.000], [0.180, 1.000],
+  [0.250, 0.905], [0.340, 0.840], [0.378, 0.800], [0.404, 0.738],
+  [0.415, 0.672], [0.424, 0.606], [0.437, 0.542], [0.459, 0.476],
+  [0.489, 0.410], [0.519, 0.344], [0.547, 0.280], [0.606, 0.228],
+  [0.691, 0.184],
 ];
 
 /** Even-odd point-in-polygon over the normalised silhouette. */
