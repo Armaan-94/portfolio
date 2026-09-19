@@ -8,7 +8,7 @@ import { CodingActivity } from "@/components/CodingActivity";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 import { ThemeShell } from "@/themes/ThemeShell";
-import { ThemeDial } from "@/components/shared/ThemeDial";
+import { ThemePeel } from "@/components/shared/ThemePeel";
 
 /**
  * The default theme.
@@ -35,7 +35,7 @@ export default function Home() {
         <Contact />
       </main>
       <Footer />
-      <ThemeDial current="default" />
+      <ThemePeel current="default" />
     </ThemeShell>
   );
 }

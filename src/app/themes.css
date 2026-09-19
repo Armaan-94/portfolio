@@ -637,3 +637,245 @@ html:has([data-theme="manga"]) {
   background-size: 100% 3px;
 }
 }
+
+/* ================================================================== */
+/*  theme peel - the switcher                                          */
+/* ================================================================== */
+/*
+ * The bottom corner of the page, lifted, with the next theme underneath.
+ *
+ * See src/components/shared/ThemePeel.tsx for the geometry. The short version:
+ * a square of side --peel in the corner, the revealed half is the lower-right
+ * triangle, and the flap is that triangle reflected across the fold with
+ * matrix(0,-1,-1,0,0,0) plus translate(100%,100%). Because the translate is a
+ * percentage of the element's own box, the reflection stays correct at every
+ * size and the hover growth is a single width/height transition.
+ *
+ * These live in @layer components so page utilities still win over them, and
+ * the per-theme grounds are written as literals rather than tokens on purpose:
+ * the peel shows the theme you are going TO while the theme you are ON owns
+ * every custom property in scope.
+ */
+@layer components {
+  .theme-peel {
+    --peel: 3.75rem;
+    --peel-ground: #0d1117;
+    --peel-ink: #e6edf3;
+    --peel-texture: none;
+
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    z-index: 120;
+    display: block;
+    width: var(--peel);
+    height: var(--peel);
+    transition:
+      width 420ms cubic-bezier(0.22, 1, 0.36, 1),
+      height 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .theme-peel:hover,
+  .theme-peel:focus-visible {
+    --peel: 13rem;
+  }
+
+  /* Nothing to hover with, so the corner rests open enough to read. */
+  @media (hover: none) {
+    .theme-peel {
+      --peel: 7.5rem;
+    }
+  }
+
+  /*
+   * The crease, drawn in the ink of the theme you are turning TO.
+   *
+   * Without it the corner is nearly invisible on the dark themes, where a dark
+   * flap sits on a dark page: the fold was doing all the work and there was
+   * barely any contrast across it. Anchored at the box top-right corner and
+   * rotated -45deg about that point, so its far end lands exactly on the
+   * bottom-left corner and it tracks --peel like everything else.
+   */
+  .theme-peel::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: calc(var(--peel) * 1.4143);
+    height: 1px;
+    transform-origin: 100% 0;
+    transform: rotate(-45deg);
+    background: var(--peel-ink);
+    opacity: 0.6;
+  }
+
+  .theme-peel:focus-visible {
+    outline: none;
+  }
+
+  .theme-peel:focus-visible .theme-peel__under {
+    outline: 2px solid var(--peel-ink);
+    outline-offset: -4px;
+  }
+
+  /* Uncovered: the next theme's ground, its own texture, and a shadow cast
+     down the crease by the corner standing above it. */
+  .theme-peel__under {
+    position: absolute;
+    inset: 0;
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    background-color: var(--peel-ground);
+    background-image:
+      linear-gradient(
+        to bottom right,
+        rgb(0 0 0 / 0.34),
+        rgb(0 0 0 / 0) 38%
+      ),
+      var(--peel-texture);
+  }
+
+  .theme-peel__label {
+    position: absolute;
+    top: 66%;
+    left: 66%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    white-space: nowrap;
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--peel-ink);
+    opacity: 0;
+    transition: opacity 260ms ease 80ms;
+  }
+
+  .theme-peel:hover .theme-peel__label,
+  .theme-peel:focus-visible .theme-peel__label,
+  .theme-peel[data-turning] .theme-peel__label {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    .theme-peel__label {
+      opacity: 1;
+      font-size: 0.6rem;
+      letter-spacing: 0.14em;
+    }
+  }
+
+  /* The back of the sheet being lifted, in the CURRENT theme's colours.
+     Reflected across the fold, lit along the crease, falling into shade at the
+     tip, and casting up-left onto the page it was lifted from. */
+  .theme-peel__flap {
+    position: absolute;
+    inset: 0;
+    transform-origin: 0 0;
+    transform: translate(100%, 100%) matrix(0, -1, -1, 0, 0, 0);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    background: linear-gradient(
+      to top left,
+      color-mix(in srgb, var(--color-canvas) 90%, var(--color-ink)) 0%,
+      var(--color-canvas) 46%,
+      color-mix(in srgb, var(--color-canvas) 82%, #000) 100%
+    );
+    filter: drop-shadow(-3px -3px 7px rgb(0 0 0 / 0.38));
+  }
+
+  /* The turn. The corner sweeps out over the whole viewport and the
+     navigation fires as it lands. */
+  .theme-peel[data-turning] {
+    --peel: 320vmax;
+    transition:
+      width 620ms cubic-bezier(0.65, 0, 0.35, 1),
+      height 620ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .theme-peel[data-turning] .theme-peel__label {
+    font-size: 1.6rem;
+  }
+
+  /* Per theme. Literals, not tokens: see the note at the top of this block. */
+  .theme-peel--default {
+    --peel-ground: #0d1117;
+    --peel-ink: #e6edf3;
+    --peel-texture: radial-gradient(
+      circle at 1px 1px,
+      rgb(139 148 158 / 0.16) 1px,
+      transparent 0
+    );
+    background-size: 14px 14px;
+  }
+
+  .theme-peel--manga {
+    --peel-ground: #f7ead9;
+    --peel-ink: #123528;
+    --peel-texture: radial-gradient(
+      circle at 1px 1px,
+      rgb(212 71 47 / 0.36) 1.4px,
+      transparent 0
+    );
+  }
+
+  .theme-peel--weyland {
+    --peel-ground: #08110f;
+    --peel-ink: #d9f2e6;
+    --peel-texture:
+      repeating-linear-gradient(
+        0deg,
+        rgb(217 242 230 / 0.13) 0 1px,
+        transparent 1px 12px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        rgb(217 242 230 / 0.13) 0 1px,
+        transparent 1px 12px
+      );
+  }
+
+  .theme-peel--retro {
+    --peel-ground: #1a1a1a;
+    --peel-ink: #dcc9a9;
+    --peel-texture: radial-gradient(
+      circle at 1px 1px,
+      rgb(184 58 45 / 0.42) 1.6px,
+      transparent 0
+    );
+  }
+
+  .theme-peel__under {
+    background-size:
+      auto,
+      12px 12px;
+  }
+
+  .theme-peel--weyland .theme-peel__under {
+    background-size: auto, auto, auto;
+  }
+
+  /*
+   * Reduced motion keeps the peel, and keeps it working: only the easing goes.
+   * Removing the control, or leaving it stuck shut so the label can never be
+   * read, would be a usability regression dressed up as an accessibility win.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .theme-peel,
+    .theme-peel[data-turning],
+    .theme-peel__label {
+      transition-duration: 1ms;
+    }
+  }
+
+  /* mix-blend and drop-shadow are undefined in forced colours; a flat,
+     outlined corner is the honest fallback. */
+  @media (forced-colors: active) {
+    .theme-peel__flap {
+      filter: none;
+      background: Canvas;
+      border: 1px solid CanvasText;
+    }
+    .theme-peel__under {
+      background: Canvas;
+      outline: 1px solid CanvasText;
+      outline-offset: -1px;
+    }
+  }
+}
