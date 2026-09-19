@@ -58,11 +58,11 @@ export const experience: Experience[] = [
     company: "Biocipher Technologies",
     role: "Associate Executive Intern, Software Engineering",
     location: "Gurugram",
-    period: "Apr 2026 - Aug 2026",
+    period: "Apr 2026 - Oct 2026",
     bullets: [
       "Built an AI-powered business-intelligence and large-scale data-processing layer over 160M+ customer records, lifting profitability across the company’s financial services.",
       "Designed and integrated scalable enterprise applications with Next.js, TypeScript, Python, DuckDB, and AI/ML workflows to automate data processing, analytics, and organization-wide insight sharing.",
-      "Engineered CRM integrations consolidating multiple business services while streamlining digital marketing and operational workflows.",
+      "Engineered CRM integrations consolidating multiple business services while streamlining digital marketing and operational workflows for improved efficiency and revenue growth.",
       "Tested, optimized, and documented AI-powered Voice, SMS, Email, and WhatsApp communication modules, and wrote the technical training resources for AI automation agents.",
     ],
     stack: ["Next.js", "TypeScript", "Python", "DuckDB", "AI/ML"],
