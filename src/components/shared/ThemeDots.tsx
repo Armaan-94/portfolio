@@ -40,6 +40,25 @@ const FRAME_H = 800;
  * preview therefore resolves palette-first and then fills in, instead of
  * flashing blank.
  */
+/**
+ * Every dot is the same object: a disc split on the diagonal, ground on one
+ * side and accent on the other, under an identical hairline ring.
+ *
+ * The first version filled with the ground and ringed with the accent, which
+ * looked uniform in the stylesheet and was not on screen: Manga's cream ground
+ * read as a solid light disc while the three dark-ground themes read as hollow
+ * rings, because their fill vanished into the panel behind them. Picking one
+ * channel instead does not work either. Three of the four grounds are
+ * near-black, and Manga's vermillion sits next to Retro's brick, so neither
+ * ground nor accent alone separates all four. Showing both does, and keeps
+ * every dot structurally identical.
+ */
+function dotStyle(swatch: readonly [string, string, string]) {
+  return {
+    backgroundImage: `linear-gradient(135deg, ${swatch[0]} 0 50%, ${swatch[2]} 50% 100%)`,
+  };
+}
+
 export function ThemeDots({ current }: { current: ThemeId }) {
   const [open, setOpen] = useState(false);
   const [preview, setPreview] = useState<ThemeId>(current);
@@ -136,7 +155,7 @@ export function ThemeDots({ current }: { current: ThemeId }) {
             aria-hidden
             data-on={t.id === current ? "" : undefined}
             className="theme-dots__dot"
-            style={{ background: t.swatch[0], borderColor: t.swatch[2] }}
+            style={dotStyle(t.swatch)}
           />
         ))}
       </button>
@@ -182,7 +201,7 @@ export function ThemeDots({ current }: { current: ThemeId }) {
                     <span
                       aria-hidden
                       className="theme-dots__dot"
-                      style={{ background: t.swatch[0], borderColor: t.swatch[2] }}
+                      style={dotStyle(t.swatch)}
                     />
                     <span>{t.label}</span>
                     {isCurrent ? (
