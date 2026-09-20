@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore, type CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import portrait from "@/data/ascii-portrait.json";
+import { useMedia } from "@/lib/useMedia";
 
 /* Mirrors scripts/ascii-prebake.mjs. The baked resting frame is composed from
    the same two tables, so the server-rendered frame and the first animated
@@ -17,19 +18,6 @@ type Tier = { cols: number; rows: number; art: string[]; levels: string[]; edges
 
 const WIDE = portrait.wide as Tier;
 const NARROW = portrait.narrow as Tier;
-
-/** Subscribe to a media query without a setState-in-effect. */
-function useMedia(query: string, serverValue: boolean) {
-  return useSyncExternalStore(
-    (onChange) => {
-      const m = window.matchMedia(query);
-      m.addEventListener("change", onChange);
-      return () => m.removeEventListener("change", onChange);
-    },
-    () => window.matchMedia(query).matches,
-    () => serverValue
-  );
-}
 
 /** Stateless sibling of the seeded PRNG in src/three/util/random.ts: a cell's
  *  grain is a pure function of (x, y, frame), so nothing has to be carried. */

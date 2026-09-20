@@ -8,7 +8,6 @@ import { CodingActivity } from "@/components/CodingActivity";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 import { ThemeShell } from "@/themes/ThemeShell";
-import { ThemePeel } from "@/components/shared/ThemePeel";
 
 /**
  * The default theme.
@@ -35,7 +34,6 @@ export default function Home() {
         <Contact />
       </main>
       <Footer />
-      <ThemePeel current="default" />
     </ThemeShell>
   );
 }

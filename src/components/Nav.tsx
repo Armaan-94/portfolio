@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { nav, profile } from "@/content";
 import { GitHubIcon, LinkedInIcon, MenuIcon, CloseIcon, DocIcon } from "./Icons";
+import { ThemeDots } from "@/components/shared/ThemeDots";
 
 // "coding" is deliberately absent from the nav links but is still a section on
 // the page, so the observer has to watch it or the active indicator sticks on
@@ -108,6 +109,7 @@ export function Nav() {
 
         {/* Right cluster */}
         <div className="flex items-center gap-1.5">
+          <ThemeDots current="default" />
           <a
             href={profile.resume}
             download

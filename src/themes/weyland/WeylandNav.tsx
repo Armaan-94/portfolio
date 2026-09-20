@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { nav, profile } from "@/content";
 import { useScrollSpy } from "@/lib/useScrollSpy";
+import { ThemeDots } from "@/components/shared/ThemeDots";
 
 const IDS = ["hero", ...nav.map((n) => n.href.slice(1))];
 
@@ -106,6 +107,10 @@ export function WeylandNav() {
               Ship syslink: active
             </span>
           </p>
+          {/* Its own cell, like every other item in this bar. */}
+          <div className="flex items-center border-l border-[var(--wy-line)] px-3.5">
+            <ThemeDots current="weyland" />
+          </div>
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}

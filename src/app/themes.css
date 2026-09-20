@@ -638,244 +638,184 @@ html:has([data-theme="manga"]) {
 }
 }
 
+
 /* ================================================================== */
-/*  theme peel - the switcher                                          */
+/*  theme dots - the switcher                                          */
 /* ================================================================== */
 /*
- * The bottom corner of the page, lifted, with the next theme underneath.
+ * Four dots in the nav; a panel with a live preview on hover.
  *
- * See src/components/shared/ThemePeel.tsx for the geometry. The short version:
- * a square of side --peel in the corner, the revealed half is the lower-right
- * triangle, and the flap is that triangle reflected across the fold with
- * matrix(0,-1,-1,0,0,0) plus translate(100%,100%). Because the translate is a
- * percentage of the element's own box, the reflection stays correct at every
- * size and the hover growth is a single width/height transition.
+ * Every colour below except the four dots themselves comes from the ACTIVE
+ * theme's own tokens, which is the whole point: an unopened switcher is four
+ * small marks in the current palette and cannot clash with the page it sits
+ * on. The dots carry their own theme's ground and accent because that is the
+ * information they exist to convey.
  *
- * These live in @layer components so page utilities still win over them, and
- * the per-theme grounds are written as literals rather than tokens on purpose:
- * the peel shows the theme you are going TO while the theme you are ON owns
- * every custom property in scope.
+ * In @layer components so page utilities still win over any of it.
  */
 @layer components {
-  .theme-peel {
-    --peel: 3.75rem;
-    --peel-ground: #0d1117;
-    --peel-ink: #e6edf3;
-    --peel-texture: none;
+  .theme-dots {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
 
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    z-index: 120;
-    display: block;
-    width: var(--peel);
-    height: var(--peel);
+  .theme-dots__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 6px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: opacity 160ms ease;
+  }
+
+  .theme-dots__trigger:hover {
+    opacity: 0.75;
+  }
+
+  .theme-dots__trigger:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  .theme-dots__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    border: 1.5px solid;
+    box-sizing: border-box;
+    flex: none;
     transition:
-      width 420ms cubic-bezier(0.22, 1, 0.36, 1),
-      height 420ms cubic-bezier(0.22, 1, 0.36, 1);
+      transform 160ms ease,
+      box-shadow 160ms ease;
   }
 
-  .theme-peel:hover,
-  .theme-peel:focus-visible {
-    --peel: 13rem;
+  /* The one you are on is ringed in the CURRENT theme's ink, so the marker
+     reads against this page rather than against the dot's own palette. */
+  .theme-dots__trigger .theme-dots__dot[data-on] {
+    transform: scale(1.28);
+    box-shadow: 0 0 0 1.5px var(--color-canvas), 0 0 0 3px var(--color-ink);
   }
 
-  /* Nothing to hover with, so the corner rests open enough to read. */
-  @media (hover: none) {
-    .theme-peel {
-      --peel: 7.5rem;
+  .theme-dots__panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 90;
+    width: 16rem;
+    padding: 12px;
+    background: var(--color-surface, var(--color-canvas));
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-card, 10px);
+    box-shadow: 0 18px 40px -20px rgb(0 0 0 / 0.55);
+    animation: theme-dots-in 160ms var(--ease-house, ease-out) both;
+  }
+
+  @keyframes theme-dots-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
     }
   }
 
-  /*
-   * The crease, drawn in the ink of the theme you are turning TO.
-   *
-   * Without it the corner is nearly invisible on the dark themes, where a dark
-   * flap sits on a dark page: the fold was doing all the work and there was
-   * barely any contrast across it. Anchored at the box top-right corner and
-   * rotated -45deg about that point, so its far end lands exactly on the
-   * bottom-left corner and it tracks --peel like everything else.
-   */
-  .theme-peel::after {
-    content: "";
+  .theme-dots__title {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    margin-bottom: 9px;
+  }
+
+  /* The preview. Fixed box, real page inside it, scaled down. The scale is
+     the box width over the rendered width and nothing else, so the miniature
+     is never distorted. */
+  .theme-dots__preview {
+    --pv-w: 232px;
+    --pv-scale: 0.18125; /* 232 / 1280 */
+    position: relative;
+    display: block;
+    width: var(--pv-w);
+    height: 145px; /* 800 * scale */
+    overflow: hidden;
+    border-radius: 6px;
+    border: 1px solid var(--color-hairline);
+    margin-bottom: 10px;
+  }
+
+  .theme-dots__preview iframe {
     position: absolute;
     top: 0;
-    right: 0;
-    width: calc(var(--peel) * 1.4143);
-    height: 1px;
-    transform-origin: 100% 0;
-    transform: rotate(-45deg);
-    background: var(--peel-ink);
-    opacity: 0.6;
-  }
-
-  .theme-peel:focus-visible {
-    outline: none;
-  }
-
-  .theme-peel:focus-visible .theme-peel__under {
-    outline: 2px solid var(--peel-ink);
-    outline-offset: -4px;
-  }
-
-  /* Uncovered: the next theme's ground, its own texture, and a shadow cast
-     down the crease by the corner standing above it. */
-  .theme-peel__under {
-    position: absolute;
-    inset: 0;
-    clip-path: polygon(100% 0, 100% 100%, 0 100%);
-    background-color: var(--peel-ground);
-    background-image:
-      linear-gradient(
-        to bottom right,
-        rgb(0 0 0 / 0.34),
-        rgb(0 0 0 / 0) 38%
-      ),
-      var(--peel-texture);
-  }
-
-  .theme-peel__label {
-    position: absolute;
-    top: 66%;
-    left: 66%;
-    transform: translate(-50%, -50%) rotate(-45deg);
-    white-space: nowrap;
-    font-size: 0.75rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--peel-ink);
+    left: 0;
+    border: 0;
+    transform-origin: 0 0;
+    transform: scale(var(--pv-scale));
+    pointer-events: none;
     opacity: 0;
-    transition: opacity 260ms ease 80ms;
+    transition: opacity 220ms ease;
   }
 
-  .theme-peel:hover .theme-peel__label,
-  .theme-peel:focus-visible .theme-peel__label,
-  .theme-peel[data-turning] .theme-peel__label {
+  /* Until it loads, the box is just that theme's ground colour, so a preview
+     resolves palette first and then fills in rather than flashing blank. */
+  .theme-dots__preview iframe[data-ready] {
     opacity: 1;
   }
 
-  @media (hover: none) {
-    .theme-peel__label {
-      opacity: 1;
-      font-size: 0.6rem;
-      letter-spacing: 0.14em;
-    }
+  .theme-dots__panel ul {
+    display: grid;
+    gap: 1px;
   }
 
-  /* The back of the sheet being lifted, in the CURRENT theme's colours.
-     Reflected across the fold, lit along the crease, falling into shade at the
-     tip, and casting up-left onto the page it was lifted from. */
-  .theme-peel__flap {
-    position: absolute;
-    inset: 0;
-    transform-origin: 0 0;
-    transform: translate(100%, 100%) matrix(0, -1, -1, 0, 0, 0);
-    clip-path: polygon(100% 0, 100% 100%, 0 100%);
-    background: linear-gradient(
-      to top left,
-      color-mix(in srgb, var(--color-canvas) 90%, var(--color-ink)) 0%,
-      var(--color-canvas) 46%,
-      color-mix(in srgb, var(--color-canvas) 82%, #000) 100%
-    );
-    filter: drop-shadow(-3px -3px 7px rgb(0 0 0 / 0.38));
-  }
-
-  /* The turn. The corner sweeps out over the whole viewport and the
-     navigation fires as it lands. */
-  .theme-peel[data-turning] {
-    --peel: 320vmax;
+  .theme-dots__panel a {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--color-body, var(--color-ink));
     transition:
-      width 620ms cubic-bezier(0.65, 0, 0.35, 1),
-      height 620ms cubic-bezier(0.65, 0, 0.35, 1);
+      background-color 160ms ease,
+      color 160ms ease;
   }
 
-  .theme-peel[data-turning] .theme-peel__label {
-    font-size: 1.6rem;
+  .theme-dots__panel a[data-active] {
+    background: var(--color-surface-2, var(--color-hairline));
+    color: var(--color-ink);
   }
 
-  /* Per theme. Literals, not tokens: see the note at the top of this block. */
-  .theme-peel--default {
-    --peel-ground: #0d1117;
-    --peel-ink: #e6edf3;
-    --peel-texture: radial-gradient(
-      circle at 1px 1px,
-      rgb(139 148 158 / 0.16) 1px,
-      transparent 0
-    );
-    background-size: 14px 14px;
+  .theme-dots__panel a:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: -2px;
   }
 
-  .theme-peel--manga {
-    --peel-ground: #f7ead9;
-    --peel-ink: #123528;
-    --peel-texture: radial-gradient(
-      circle at 1px 1px,
-      rgb(212 71 47 / 0.36) 1.4px,
-      transparent 0
-    );
+  .theme-dots__now {
+    margin-left: auto;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-muted);
   }
 
-  .theme-peel--weyland {
-    --peel-ground: #08110f;
-    --peel-ink: #d9f2e6;
-    --peel-texture:
-      repeating-linear-gradient(
-        0deg,
-        rgb(217 242 230 / 0.13) 0 1px,
-        transparent 1px 12px
-      ),
-      repeating-linear-gradient(
-        90deg,
-        rgb(217 242 230 / 0.13) 0 1px,
-        transparent 1px 12px
-      );
-  }
-
-  .theme-peel--retro {
-    --peel-ground: #1a1a1a;
-    --peel-ink: #dcc9a9;
-    --peel-texture: radial-gradient(
-      circle at 1px 1px,
-      rgb(184 58 45 / 0.42) 1.6px,
-      transparent 0
-    );
-  }
-
-  .theme-peel__under {
-    background-size:
-      auto,
-      12px 12px;
-  }
-
-  .theme-peel--weyland .theme-peel__under {
-    background-size: auto, auto, auto;
+  .theme-dots__veil {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    pointer-events: none;
   }
 
   /*
-   * Reduced motion keeps the peel, and keeps it working: only the easing goes.
-   * Removing the control, or leaving it stuck shut so the label can never be
-   * read, would be a usability regression dressed up as an accessibility win.
+   * Reduced motion keeps the switcher entirely and keeps the preview: only the
+   * easing goes. The panel appearing and the frame fading in are both
+   * information, not decoration.
    */
   @media (prefers-reduced-motion: reduce) {
-    .theme-peel,
-    .theme-peel[data-turning],
-    .theme-peel__label {
+    .theme-dots__panel,
+    .theme-dots__preview iframe,
+    .theme-dots__dot,
+    .theme-dots__trigger {
+      animation-duration: 1ms;
       transition-duration: 1ms;
-    }
-  }
-
-  /* mix-blend and drop-shadow are undefined in forced colours; a flat,
-     outlined corner is the honest fallback. */
-  @media (forced-colors: active) {
-    .theme-peel__flap {
-      filter: none;
-      background: Canvas;
-      border: 1px solid CanvasText;
-    }
-    .theme-peel__under {
-      background: Canvas;
-      outline: 1px solid CanvasText;
-      outline-offset: -1px;
     }
   }
 }
