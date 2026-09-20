@@ -7,7 +7,6 @@ import { Specimen } from "./Specimen";
 import { DotMatrix } from "./DotMatrix";
 import { Comms } from "./Comms";
 import { RetroFooter } from "./RetroFooter";
-import { ThemePeel } from "@/components/shared/ThemePeel";
 
 /**
  * American-retro poster.
@@ -35,7 +34,6 @@ export function RetroLayout() {
         <Comms />
       </main>
       <RetroFooter />
-      <ThemePeel current="retro" />
     </div>
   );
 }

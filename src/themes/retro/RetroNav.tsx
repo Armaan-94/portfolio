@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { nav, profile } from "@/content";
 import { useScrollSpy } from "@/lib/useScrollSpy";
+import { ThemeDots } from "@/components/shared/ThemeDots";
 
 const IDS = ["hero", ...nav.map((n) => n.href.slice(1))];
 
@@ -54,6 +55,7 @@ export function RetroNav() {
         </ul>
 
         <div className="flex items-center gap-4">
+          <ThemeDots current="retro" />
           <a
             href={profile.resume}
             download

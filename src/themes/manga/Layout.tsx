@@ -9,7 +9,6 @@ import {
   Practice,
 } from "./Sections";
 import { MangaContact, MangaFooter } from "./MangaContact";
-import { ThemePeel } from "@/components/shared/ThemePeel";
 
 /**
  * Retro Japanese comic print.
@@ -43,7 +42,6 @@ export function MangaLayout() {
         <MangaContact />
       </main>
       <MangaFooter />
-      <ThemePeel current="manga" />
     </div>
   );
 }
