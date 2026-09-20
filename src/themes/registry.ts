@@ -26,7 +26,14 @@ export type ThemeMeta = {
   tagline: string;
   /** Route that renders this theme. */
   href: string;
-  /** [ground, ink, accent] for the dial's mini preview. */
+  /**
+   * [ground, ink, accent]. Order matters and is load-bearing: the switcher
+   * paints the ground on one half of a dot and the ACCENT on the other, so a
+   * theme that lists its body ink where its accent belongs draws the dark half
+   * on the wrong side and reads as inverted next to the others. Manga did
+   * exactly that, with pine at index 1 and vermillion at 2, when pine is the
+   * body ink at 11.32:1 on the cream and vermillion is the accent.
+   */
   swatch: readonly [string, string, string];
   /** Drives <meta name="color-scheme"> and the CSS override for form controls. */
   scheme: "dark" | "light";
@@ -49,7 +56,7 @@ export const THEMES: readonly ThemeMeta[] = [
     label: "Manga",
     tagline: "Retro comic print, three inks on cream",
     href: "/manga",
-    swatch: ["#f7ead9", "#d4472f", "#123528"],
+    swatch: ["#f7ead9", "#123528", "#d4472f"],
     scheme: "light",
     themeColor: "#f7ead9",
   },
