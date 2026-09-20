@@ -41,10 +41,15 @@ const FRAME_H = 800;
  * flashing blank.
  */
 /**
- * Every dot is the same object: a disc split on the diagonal, ground on one
- * side and accent on the other, under an identical hairline ring.
+ * Every dot is the same object: a disc split on the diagonal, the theme's
+ * ground on one side and its signature colour on the other, under an
+ * identical hairline ring.
  *
- * The first version filled with the ground and ringed with the accent, which
+ * Three of the four grounds are near-black because three of the four themes
+ * are dark; Manga is the only light one. That asymmetry is the dot doing its
+ * job, not a defect.
+ *
+ * An earlier version filled with the ground and ringed with the accent, which
  * looked uniform in the stylesheet and was not on screen: Manga's cream ground
  * read as a solid light disc while the three dark-ground themes read as hollow
  * rings, because their fill vanished into the panel behind them. Picking one
@@ -53,9 +58,9 @@ const FRAME_H = 800;
  * ground nor accent alone separates all four. Showing both does, and keeps
  * every dot structurally identical.
  */
-function dotStyle(swatch: readonly [string, string, string]) {
+function dotStyle(ground: string, signature: string) {
   return {
-    backgroundImage: `linear-gradient(135deg, ${swatch[0]} 0 50%, ${swatch[2]} 50% 100%)`,
+    backgroundImage: `linear-gradient(135deg, ${ground} 0 50%, ${signature} 50% 100%)`,
   };
 }
 
@@ -155,7 +160,7 @@ export function ThemeDots({ current }: { current: ThemeId }) {
             aria-hidden
             data-on={t.id === current ? "" : undefined}
             className="theme-dots__dot"
-            style={dotStyle(t.swatch)}
+            style={dotStyle(t.swatch[0], t.signature)}
           />
         ))}
       </button>
@@ -201,7 +206,7 @@ export function ThemeDots({ current }: { current: ThemeId }) {
                     <span
                       aria-hidden
                       className="theme-dots__dot"
-                      style={dotStyle(t.swatch)}
+                      style={dotStyle(t.swatch[0], t.signature)}
                     />
                     <span>{t.label}</span>
                     {isCurrent ? (
