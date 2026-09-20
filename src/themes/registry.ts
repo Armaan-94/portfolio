@@ -35,6 +35,19 @@ export type ThemeMeta = {
    * body ink at 11.32:1 on the cream and vermillion is the accent.
    */
   swatch: readonly [string, string, string];
+  /**
+   * The one colour that most says "this theme", used for the lit half of the
+   * switcher dot.
+   *
+   * Deliberately not derived from `swatch`, because no single slot of it is
+   * right for all four. Default and Manga are best said by their accent,
+   * indigo and vermillion. Weyland is said by its mint, which is the body
+   * INK: the amber accent is a small highlight and picking it made the dot
+   * look like a theme nobody would recognise. Retro is said by its brick.
+   * Reaching into a different slot per theme would just be the transposition
+   * bug again with extra steps, so the choice is stated outright.
+   */
+  signature: string;
   /** Drives <meta name="color-scheme"> and the CSS override for form controls. */
   scheme: "dark" | "light";
   /** Browser chrome colour on mobile. */
@@ -50,6 +63,7 @@ export const THEMES: readonly ThemeMeta[] = [
     swatch: ["#0d1117", "#e6edf3", "#818cf8"],
     scheme: "dark",
     themeColor: "#0d1117",
+    signature: "#818cf8",
   },
   {
     id: "manga",
@@ -59,6 +73,7 @@ export const THEMES: readonly ThemeMeta[] = [
     swatch: ["#f7ead9", "#123528", "#d4472f"],
     scheme: "light",
     themeColor: "#f7ead9",
+    signature: "#d4472f",
   },
   {
     id: "weyland",
@@ -68,6 +83,7 @@ export const THEMES: readonly ThemeMeta[] = [
     swatch: ["#08110f", "#d9f2e6", "#e8b04b"],
     scheme: "dark",
     themeColor: "#08110f",
+    signature: "#d9f2e6",
   },
   {
     id: "retro",
@@ -77,6 +93,7 @@ export const THEMES: readonly ThemeMeta[] = [
     swatch: ["#1a1a1a", "#dcc9a9", "#b83a2d"],
     scheme: "dark",
     themeColor: "#1a1a1a",
+    signature: "#b83a2d",
   },
 ] as const;
 
