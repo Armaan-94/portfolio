@@ -680,10 +680,12 @@ html:has([data-theme="manga"]) {
   }
 
   .theme-dots__dot {
-    width: 9px;
-    height: 9px;
+    width: 10px;
+    height: 10px;
     border-radius: 999px;
-    border: 1.5px solid;
+    /* One ring for all four, in the CURRENT theme's ink, so the dots differ
+       only in their own colours and never in their structure. */
+    border: 1px solid color-mix(in srgb, var(--color-ink) 24%, transparent);
     box-sizing: border-box;
     flex: none;
     transition:
